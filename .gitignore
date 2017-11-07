@@ -1,3 +1,10 @@
+# KoordFE auto-generated files
+KoordFE/parser.out
+KoordFE/parsetab.py
+
+# log files
+logs/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

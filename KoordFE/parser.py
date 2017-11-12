@@ -174,15 +174,26 @@ def p_varnames(p):
        
 
 def p_type(p):
-    '''type : INT
+    '''type : numtype
+            | uncertaintype
             | STRING 
-            | FLOAT
-            | IPOS
-            | BOOLEAN 
     '''
     p[0] = p[1]
 
     #print(p[0])
+
+def p_numtype(p):
+    '''numtype : INT
+               | FLOAT
+               | IPOS
+               | BOOLEAN
+    '''
+    p[0] = p[1]
+
+def p_uncertaintype(p):
+    ''' uncertaintype : UNCERTAIN LT numtype GT'''
+    # TODO construct AST with uncertain information
+    p[0] = p[3]
 
 def p_init(p):
     '''init : INIT COLON NL INDENT stmts DEDENT

@@ -11,6 +11,7 @@ RESERVED = {
   "sensors" : "SENSORS",
   "actuators" : "ACTUATORS", 
   "String" : "STRING", "int" : "INT", "float" : 'FLOAT', 'boolean': 'BOOLEAN','ItemPosition':'IPOS', #'Stage' : 'STAGE', 
+  "Uncertain" : "UNCERTAIN",
   "allwrite" : "ALLWRITE",
   "allread" : "ALLREAD",
   "local" : "LOCAL",

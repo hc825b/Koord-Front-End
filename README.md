@@ -1,5 +1,31 @@
 
-INSTALLATION:
+# Installing
+
++ Dependencies
+  - Java JDK 7 or Higher
+  - Maven
+  - Python 2.7 and pip
+  - Python Lex Yacc (python-ply)
+
+For Ubuntu 16.04 LTS, you can run following commands to install required
+dependecies.
+
+```
+sudo apt install default-jdk maven python python-pip
+pip install ply
+```
+
+# Running example apps
+
+Example Koord programs `*.krd` should be stored in `appCode` directory. To
+simulate a Koord program, e.g. `uncertainaddnum.krd`,
+```
+./simulate.sh uncertainaddnum.krd
+``` 
+
+-----------------------------------------------------------------------------
+
+# OLD README
 
 --High level language
 
@@ -7,9 +33,9 @@ Java Development Kit (required JDK 7 or higher)
 
 You can download the required JDK at http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
-In Linux systems, to make sure that everything works you should be able to call java -version and javac -version from a Terminal. For Windows and Mac users, find the Java Control Panel. Under the General tab in the Java Control Panel, the version can be checked from the About section.
+In Linux systems, to make sure that everything works you should be able to call `java -version` and `javac -version` from a Terminal. For Windows and Mac users, find the Java Control Panel. Under the General tab in the Java Control Panel, the version can be checked from the About section.
 
-###Python 2.7.x Python 2 is required for the parser. Visit https://www.python.org/downloads/ to download and install python.
+### Python 2.7.x Python 2 is required for the parser. Visit https://www.python.org/downloads/ to download and install python.
 
 Python Lex Yacc (ply)
 
@@ -19,11 +45,13 @@ It might be required to provide the full installation path of python, in case th
 
 Ensure that you have the execute permissions the scripts 
 
-Installing StarL (newlib) 
+Installing StarL (newlib)
+ 
 We are migrating to the adopt-handler mechanism of starL now. for user convenience we use maven to compile projects. install maven from linux repositories if you have linux. This assumes you have installed java on your system.
 
 
-Running apps:
+# Running apps
+
 Your file should be stored in the appCode directory, and should have an extension ".krd"
 To run application, run  ./simulate.sh <appname.krd> 
 

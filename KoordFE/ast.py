@@ -1,5 +1,6 @@
-"""Abstract Syntax Tree"""
+"""Abstract Syntax Tree implementation"""
 
+from ast_base import AstBase
 from symtab import *
 LOCAL = -1
 MULTI_WRITER = -2
@@ -18,7 +19,7 @@ functype = 'func'
 atomictype = 'atom'
 
 
-class pgmAst(list):
+class pgmAst(AstBase):
     """AST for Program"""
 
     def __init__(self, name, modules, awdecls, ardecls, locdecls, init, events):
@@ -72,8 +73,11 @@ class pgmAst(list):
     def get_type(self):
         return pgmtype
 
+    def accept(self, visitor):
+        visitor.visitProgram(self)
 
-class mfAst(list):
+
+class mfAst(AstBase):
     def __init__(self, modfunc, args):
         self.modfunc = modfunc
         self.args = args
@@ -90,10 +94,13 @@ class mfAst(list):
         return(m)
 
     def get_type(self):
-        return moduletype
+        return moduletype  # TODO Why returning moduletype?
+
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
 
-class funcAst(list):
+class funcAst(AstBase):
     def __init__(self, name, args):
         self.name = name
         self.args = args
@@ -111,16 +118,25 @@ class funcAst(list):
     def get_type(self):
         return functype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class passAst(list):
+
+class passAst(AstBase):
     def __init__(self):
         pass
+
+    def __repr__(self):
+        return ";"
 
     def get_type(self):
         return 'pass'
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class moduleAst(list):
+
+class moduleAst(AstBase):
     def __init__(self, name, actuatordecls, sensordecls):
         self.name = name
         self.actuatordecls = actuatordecls
@@ -142,8 +158,11 @@ class moduleAst(list):
     def get_type(self):
         return moduletype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class initAst(object):
+
+class initAst(AstBase):
     def __init__(self, stmts):
         self.stmts = stmts
 
@@ -156,13 +175,19 @@ class initAst(object):
     def get_type(self):
         return inittype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class stmtAst(list):
+
+class stmtAst(AstBase):
     def __init__(self, stype):
         self.stype = stype
 
     def get_type(self):
         return self.stype
+
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
 
 class atomicAst(stmtAst):
@@ -180,6 +205,9 @@ class atomicAst(stmtAst):
     def get_type(self):
         return atomictype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
+
 
 class asgnAst(stmtAst):
     def __init__(self, lvar, rexp):
@@ -189,6 +217,9 @@ class asgnAst(stmtAst):
 
     def __repr__(self):
         return str(self.lvar) + " = " + str(self.rexp)
+
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
 
 class iteAst(stmtAst):
@@ -207,8 +238,11 @@ class iteAst(stmtAst):
             s += str(stmt)
         return s
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class eventAst(list):
+
+class eventAst(AstBase):
     def __init__(self, name, pre, eff):
         self.name = name
         self.pre = pre
@@ -225,8 +259,11 @@ class eventAst(list):
     def get_type(self):
         return evnttype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class condAst(list):
+
+class condAst(AstBase):
     def __init__(self, lexp, rexp=None, op=None):
         self.lexp = lexp
         self.rexp = rexp
@@ -243,8 +280,11 @@ class condAst(list):
     def get_type(self):
         return condtype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class exprAst(list):
+
+class exprAst(AstBase):
     def __init__(self, etype, lexp, rexp=None, op=None):
         self.etype = etype
         self.lexp = lexp
@@ -264,8 +304,11 @@ class exprAst(list):
     def get_type(self):
         return self.etype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class declAst(list):
+
+class declAst(AstBase):
     def __init__(self, dtype, varname, value=None, scope=LOCAL):
         self.scope = scope
         self.dtype = dtype
@@ -289,8 +332,11 @@ class declAst(list):
     def get_type(self):
         return decltype
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class mapAst(list):
+
+class mapAst(AstBase):
     def __init__(self, t1, t2, varname, scope=LOCAL):
         self.scope = scope
         self.t1 = t1
@@ -315,8 +361,11 @@ class mapAst(list):
     def get_type(self):
         return 'map'
 
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
-class rvdeclAst(list):
+
+class rvdeclAst(AstBase):
 
     def __init__(self, dtype, varname, owner, value=None, scope=LOCAL):
         self.scope = scope
@@ -342,6 +391,9 @@ class rvdeclAst(list):
 
     def get_type(self):
         return rvdecltype
+
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
 
 
 def mkEntry(decl):

@@ -394,12 +394,35 @@ class myparser(object):
 class mycompiler(object):
     def __init__(self):
         self.parser = myparser()
+        self.pgm = None
+        self.wnum = None
+        self.symtab = None
+
+    def parse(self, code):
+        self.pgm = self.parser.parse(code)
+        print(self.pgm.name)
+
+        global wnum
+        global symtab
+        self.wnum = wnum
+        self.symtab = symtab
+
+    def generate_app(self):
+        return codeGen(self.pgm, 0, self.symtab, self.wnum)
+
+    def generate_main(self):
+        return mainCodeGen(self.pgm.name, self.pgm.name + "Drawer")
+
+    def generate_drawer(self):
+        return drawCodeGen(self.pgm.name)
+
+    def generate_symtab(self):
+        return str(self.symtab)
 
     def compile(self, filename):
         code = open(filename, "r").read()
         pgm = (self.parser.parse(code))
 
-        #appname = "testAdd"
         print(pgm.name)
         appname = str(pgm.name) + "App.java"
         f = open(appname, "w")
@@ -420,6 +443,6 @@ class mycompiler(object):
         f.close()
 
 
-#filename = str(raw_input("enter filename:\n"))
-filename = sys.argv[1]
-mycompiler().compile(filename)
+if __name__ == "__main__":
+    filename = sys.argv[1]
+    mycompiler().compile(filename)

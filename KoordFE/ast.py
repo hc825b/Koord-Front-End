@@ -73,7 +73,7 @@ class pgmAst(list):
         return pgmtype
 
 
-class mfast(list):
+class mfAst(list):
     def __init__(self, modfunc, args):
         self.modfunc = modfunc
         self.args = args

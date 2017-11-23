@@ -297,7 +297,7 @@ def p_stmt(p):
 
 def p_modulefunccall(p):
     '''modulefunccall : CID LPAR args RPAR '''
-    p[0] = mfast(p[3])
+    p[0] = mfAst(p[3])
 
 
 def p_elseblock(p):

@@ -50,21 +50,21 @@ def p_module(p):
 
 def p_actuatordecls(p):
     '''actuatordecls : ACTUATORS COLON NL INDENT decls DEDENT
-                     | ACTUATORS COLON NL INDENT pass DEDENT
+                     | ACTUATORS COLON NL INDENT passdecls DEDENT
     '''
     p[0] = p[5]
 
 
 def p_sensordecls(p):
     '''sensordecls : SENSORS COLON NL INDENT decls DEDENT
-                   | SENSORS COLON NL INDENT pass DEDENT
+                   | SENSORS COLON NL INDENT passdecls DEDENT
     '''
     p[0] = p[5]
 
 
 def p_awdecls(p):
     '''awdecls : ALLWRITE COLON NL INDENT decls DEDENT
-               | ALLWRITE COLON NL INDENT pass DEDENT'''
+               | ALLWRITE COLON NL INDENT passdecls DEDENT'''
     # print(p[5])
     for decl in p[5]:
         # print(decl)
@@ -76,7 +76,7 @@ def p_awdecls(p):
 
 def p_ardecls(p):
     '''ardecls : ALLREAD COLON NL INDENT rvdecls DEDENT
-               | ALLREAD COLON NL INDENT pass DEDENT'''
+               | ALLREAD COLON NL INDENT passdecls DEDENT'''
     # print(p[5])
     for decl in p[5]:
         # print(decl)
@@ -84,6 +84,11 @@ def p_ardecls(p):
         global symtab
         symtab.append(mkEntry(decl))
     p[0] = p[5]
+
+
+def p_passdecls(p):
+    '''passdecls : PASS NL'''
+    p[0] = []
 
 
 def p_locdecls(p):
@@ -274,7 +279,7 @@ def p_stmts(p):
 
 def p_stmt(p):
     '''stmt : asgn
-            | pass
+            | passstmt
             | funccall NL
             | modulefunccall NL
             | ATOMIC COLON NL INDENT stmts DEDENT
@@ -300,8 +305,8 @@ def p_elseblock(p):
     p[0] = p[5]
 
 
-def p_pass(p):
-    '''pass : PASS NL'''
+def p_passstmt(p):
+    '''passstmt : PASS NL'''
     p[0] = passAst()
 
 

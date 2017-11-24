@@ -1,17 +1,15 @@
 """Type Checking for Uncertain<T>"""
 
-from ast_base import AstVisitorBase
+from ast_base import PostOrderVisitor
 
 
-class TypeInfoVisitor(AstVisitorBase):
+class TypeInfoVisitor(PostOrderVisitor):
     """AST Visitor to collect type info for each expression"""
 
     def __init__(self):
         pass
-        super.__init__()
+        super(TypeInfoVisitor, self).__init__()
 
     def visitProgram(self, pgm):
-        pass  # TODO
-
-    def visitStatement(self, stmt):
-        raise NotImplementedError
+        # TODO
+        return True

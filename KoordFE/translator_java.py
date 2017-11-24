@@ -17,7 +17,7 @@ class ToJavaTranslator(object):
 
     def generate_app(self):
         visitor = TypeInfoVisitor()
-        visitor.visitProgram(self.pgm)
+        visitor.traverseProgram(self.pgm)
 
         return codeGen(self.pgm, 0, self.symtab, self.wnum)
 

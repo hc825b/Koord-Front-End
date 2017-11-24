@@ -74,7 +74,7 @@ class pgmAst(AstBase):
         return pgmtype
 
     def accept(self, visitor):
-        visitor.visitProgram(self)
+        return visitor.traverseProgram(self)
 
 
 class mfAst(AstBase):
@@ -122,20 +122,6 @@ class funcAst(AstBase):
         raise NotImplementedError # TODO
 
 
-class passAst(AstBase):
-    def __init__(self):
-        pass
-
-    def __repr__(self):
-        return ";"
-
-    def get_type(self):
-        return 'pass'
-
-    def accept(self, visitor):
-        raise NotImplementedError # TODO
-
-
 class moduleAst(AstBase):
     def __init__(self, name, actuatordecls, sensordecls):
         self.name = name
@@ -159,7 +145,7 @@ class moduleAst(AstBase):
         return moduletype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        return visitor.traverseModule(self)
 
 
 class initAst(AstBase):
@@ -187,7 +173,7 @@ class stmtAst(AstBase):
         return self.stype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        raise NotImplementedError
 
 
 class atomicAst(stmtAst):
@@ -220,6 +206,20 @@ class asgnAst(stmtAst):
 
     def accept(self, visitor):
         raise NotImplementedError # TODO
+
+
+class passAst(stmtAst):
+    def __init__(self):
+        pass
+
+    def __repr__(self):
+        return ";"
+
+    def get_type(self):
+        return 'pass'
+
+    def accept(self, visitor):
+        return visitor.traversePassStmt(self)
 
 
 class iteAst(stmtAst):
@@ -260,7 +260,7 @@ class eventAst(AstBase):
         return evnttype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        return visitor.traverseEvent(self)
 
 
 class condAst(AstBase):
@@ -333,7 +333,7 @@ class declAst(AstBase):
         return decltype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        return visitor.traverseDeclaration(self)
 
 
 class mapAst(AstBase):

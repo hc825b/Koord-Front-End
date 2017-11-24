@@ -16,8 +16,8 @@ class ToJavaTranslator(object):
         self.symtab = parser.symtab
 
     def generate_app(self):
-        visitor = TypeInfoVisitor()
-        visitor.traverseProgram(self.pgm)
+        # visitor = TypeInfoVisitor()
+        # visitor.traverseProgram(self.pgm)
 
         return codeGen(self.pgm, 0, self.symtab, self.wnum)
 

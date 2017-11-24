@@ -242,18 +242,18 @@ def p_event(p):
     p[0] = eventAst(p[1], p[7], p[9])
 
 
-def p_effblock(p):
-    '''effblock : EFF COLON NL INDENT stmts DEDENT
-                | EFF COLON stmt
-    '''
-    if len(p) > 4:
-        p[0] = p[5]
-    else:
-        p[0] = p[3]
+def p_effblock_stmt(p):
+    '''effblock : EFF COLON stmt'''
+    p[0] = [p[3]]  # List with only one element
+
+
+def p_effblock_stmts(p):
+    '''effblock : EFF COLON NL INDENT stmts DEDENT'''
+    p[0] = p[5]
 
 
 def p_cond(p):
-    '''cond :  LPAR cond AND cond RPAR
+    '''cond : LPAR cond AND cond RPAR
             | LPAR cond OR cond RPAR
             | LPAR cond op cond RPAR
             | LPAR NOT cond RPAR

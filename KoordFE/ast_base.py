@@ -52,6 +52,18 @@ class AstVisitorBase(object):
     def traversePassStmt(self, stmt):
         pass
 
+    @abc.abstractmethod
+    def traverseOrExpr(self, expr):
+        pass
+
+    @abc.abstractmethod
+    def traverseAndExpr(self, expr):
+        pass
+
+    @abc.abstractmethod
+    def traverseNotExpr(self, expr):
+        pass
+
 class PostOrderVisitor(AstVisitorBase):
     """Visit AST in post-order"""
 
@@ -59,35 +71,70 @@ class PostOrderVisitor(AstVisitorBase):
         super(PostOrderVisitor, self).__init__()
 
     def traverseProgram(self, pgm):
-        if any((m.accept(self) == False) for m in pgm.modules):
+        if any((not m.accept(self)) for m in pgm.modules):
             return False
-        if any((d.accept(self) == False) for d in pgm.awdecls):
+        if any((not d.accept(self)) for d in pgm.awdecls):
             return False
-        if any((d.accept(self) == False) for d in pgm.ardecls):
+        if any((not d.accept(self)) for d in pgm.ardecls):
             return False
-        if any((d.accept(self) == False) for d in pgm.locdecls):
+        if any((not d.accept(self)) for d in pgm.locdecls):
             return False
-        if any((s.accept(self) == False) for s in pgm.init):
+        if any((not s.accept(self)) for s in pgm.init):
             return False
-        if any((e.accept(self) == False) for e in pgm.events):
+        if any((not e.accept(self)) for e in pgm.events):
             return False
         return self.visitProgram(pgm)
 
     def traverseModule(self, module):
-        # TODO
+        if any((not d.accept(self)) for d in module.actuatordecls):
+            return False
+        if any((not d.accept(self)) for d in module.sensordecls):
+            return False
         return self.visitModule(module)
 
     def traverseDeclaration(self, decl):
         return True # TODO
 
     def traverseEvent(self, event):
-        return True # TODO
+        if not event.pre.accept(self):
+            return False
+        if any((not s.accept(self)) for s in event.eff):
+            return False
+        return True
 
     def traversePassStmt(self, stmt):
         return True
+
+    def traverseOrExpr(self, expr):
+        if not expr.lexp.accept(self):
+            return False
+        if not expr.rexp.accept(self):
+            return False
+        return self.visitOrExpr(expr)
+
+    def traverseAndExpr(self, expr):
+        if not expr.lexp.accept(self):
+            return False
+        if not expr.rexp.accept(self):
+            return False
+        return self.visitAndExpr(expr)
+
+    def traverseNotExpr(self, expr):
+        if not expr.lexp.accept(self):
+            return False
+        return self.visitNotExpr(expr)
 
     def visitProgram(self, pgm):
         return True
 
     def visitModule(self, module):
+        return True
+
+    def visitOrExpr(self, expr):
+        return True
+
+    def visitAndExpr(self, expr):
+        return True
+
+    def visitNotExpr(self, expr):
         return True

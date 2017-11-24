@@ -263,7 +263,7 @@ class eventAst(AstBase):
         return visitor.traverseEvent(self)
 
 
-class condAst(AstBase):
+class condAst(AstBase): # TODO Inherit from exprAst
     def __init__(self, lexp, rexp=None, op=None):
         self.lexp = lexp
         self.rexp = rexp
@@ -281,7 +281,15 @@ class condAst(AstBase):
         return condtype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        if self.op == '||':
+            return visitor.traverseOrExpr(self)
+        if self.op == '&&':
+            return visitor.traverseAndExpr(self)
+        if self.op == '!':
+            return visitor.traverseNotExpr(self)
+        # TODO It is too troublesome to refactor condition expressions without
+        # breaking original code generation. Do it some other day
+        raise RuntimeError(str(self))
 
 
 class exprAst(AstBase):

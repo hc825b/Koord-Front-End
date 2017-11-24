@@ -3,7 +3,7 @@
 from codegen import *
 import parser
 from parser import myparser
-#from typechecker import TypeInfoVisitor
+from typechecker import TypeInfoVisitor
 
 
 class ToJavaTranslator(object):
@@ -16,9 +16,8 @@ class ToJavaTranslator(object):
         self.symtab = parser.symtab
 
     def generate_app(self):
-        # visitor = TypeInfoVisitor()
-
-        # visitor.visitProgram(self.pgm)
+        visitor = TypeInfoVisitor()
+        visitor.visitProgram(self.pgm)
 
         return codeGen(self.pgm, 0, self.symtab, self.wnum)
 

@@ -34,3 +34,7 @@ class AstVisitorBase(object):
     @abc.abstractmethod
     def visitProgram(self, pgm):
         pass
+
+    @abc.abstractmethod
+    def visitStatement(self, stmt):
+        pass

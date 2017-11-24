@@ -4,7 +4,7 @@ import argparse
 import os
 import sys
 
-from KoordFE.parser import mycompiler
+from KoordFE.translator_java import ToJavaTranslator
 
 
 def main(argv):
@@ -14,8 +14,7 @@ def main(argv):
                             metavar="<app.krd>", help="Koord program code")
     args = cmd_parser.parse_args()
 
-    krd_compiler = mycompiler()
-    krd_compiler.parse(args.krd_file.read())
+    krd_compiler = ToJavaTranslator(args.krd_file.read())
 
     # TODO + "/src/main/java/testSim/"
     dirPath = os.path.dirname(os.path.realpath(__file__))

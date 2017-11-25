@@ -306,23 +306,21 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
             istr += codeGen(stmt, 1, symtab)
         istr += "}\n"
         s += mkindent(istr, tabs)
-    elif inputAst.get_type() == 'decl':
-        qualifier = ""
-        if inputAst.scope == LOCAL:
-            qualifier = ""
-        elif inputAst.scope == MULTI_WRITER:
-            qualifier = "public"
-        elif inputAst.scope == MULTI_READER:
-            qualifier = "public"
-        elif inputAst.scope == CONTROLLER:
-            qualifier = "public"
-        # print(inputast.value)
-        if inputAst.value is None:
-            s = mkindent(qualifier + " " + str(inputAst.dtype) +
-                         " " + str(inputAst.varname) + ";", tabs)
-        else:
-            s = mkindent(qualifier + " " + str(inputAst.dtype) + " " +
-                         str(inputAst.varname) + " = " + str(inputAst.value) + ";", tabs)
+    elif inputAst.get_type() == decltype:
+        qualifier = {LOCAL: "",
+                     MULTI_WRITER: "public",
+                     MULTI_READER: "public",
+                     CONTROLLER: "public"}[inputAst.scope]
+
+        javatype = {'int': "Uncertain<Integer>",
+                    'boolean': "Uncertain<Boolean>",
+                    'float': "Uncertain<Float>",
+                    'ItemPosition': "Uncertain<ItemPosition>"}[inputAst.dtype]
+        javadecl = [qualifier, javatype, str(inputAst.varname)]
+        if inputAst.value:
+            javadecl.extend(['=', str(inputAst.value)]) # TODO new object instead
+        javadecl.append(';')
+        s = mkindent(' '.join(javadecl), tabs)
     return s
 
 

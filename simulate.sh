@@ -13,5 +13,5 @@ cd ..
 mvn compile 
 mvn install
 HOME_DIR=`echo "$HOME"`
-java -cp target/newLib-0.1-BasicFunctionality.jar:"$HOME_DIR"/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:lib/* testSim.$an.Main
+mvn exec:java -Dexec.mainClass="testSim.$an.Main"
 rm $1

@@ -54,6 +54,8 @@ def impCodeGen():
     s += "import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;\n"
     s += "\n"
+    s += "import edu.illinois.uncertain.Uncertain;\n"
+    s += "\n"
     return s
 
 
@@ -117,8 +119,9 @@ def mandatoryInits(pgmast, tabs, wnum):
     inits += mkindent("numBots = gvh.id.getParticipants().size();", tabs)
     flags = pgmast.getflags()
     if flags[1] == True:
+        s = ""
         for i in range(0, wnum):
-            s = "mutex" + str(i) + "= new GroupSetMutex(gvh, 0);\n"
+            s += "mutex" + str(i) + "= new GroupSetMutex(gvh, 0);\n"
         s += "dsm = new DSMMultipleAttr(gvh);"
         inits += mkindent(s, tabs)
     for module in flags[0]:
@@ -318,9 +321,14 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                     'ItemPosition': "ItemPosition"}[inputAst.dtype]
         utype = "Uncertain<" + wraptype + ">"
         javadecl = [qualifier, utype, str(inputAst.varname)]
+
         if inputAst.value:
-            new = "new Pointmass<" + wraptype + ">" + \
-                  "(" + str(inputAst.value) + ")"
+            value = {'int': str(inputAst.value),
+                     'boolean': str(inputAst.value),
+                     'float': str(inputAst.value) + 'F',
+                     'ItemPosition': "new ItemPosition(" + str(inputAst.value) + ")"
+                    }[inputAst.dtype]
+            new = "Uncertain.newConstant(" + value + ")"
             javadecl.extend(['=', new])
         javadecl.append(';')
         s = mkindent(' '.join(javadecl), tabs)

@@ -6,7 +6,7 @@ from ast import *
 from codegen import *
 from symtab import *
 
-wnum = 0 # TODO remove global variables
+wnum = 0  # TODO remove global variables
 symtab = []
 
 
@@ -99,31 +99,29 @@ def p_locdecls(p):
     p[0] = p[5]
 
 
-def p_decls(p):
-    '''decls : decl decls
-            |  type varnames NL
-            | empty
-    '''
-    dlist = []
-    if len(p) == 4:
-        dlist = []
-        for varname in p[2]:
-            dlist.append(declAst(p[1], varname))
-        p[0] = dlist
-    elif len(p) == 3:
-        dlist.append(p[1])
-        dlist += p[2]
-    p[0] = dlist
+def p_decls_empty(p):
+    '''decls : empty'''
+    p[0] = []
+
+
+def p_decls_nonempty(p):
+    '''decls : decl decls'''
+    p[0] = [p[1]] + p[2]
 
 
 def p_decl(p):
-    '''decl : type varname ASGN exp NL
-            | mapdecl NL
-    '''
-    if len(p) == 3:
-        p[0] = (p[1])
-    else:
-        p[0] = (declAst(p[1], p[2], p[4]))
+    '''decl : type varname NL'''
+    p[0] = declAst(p[1], p[2])
+
+
+def p_decl_init(p):
+    '''decl : type varname ASGN exp NL'''
+    p[0] = (declAst(p[1], p[2], p[4]))
+
+
+def p_decl_map(p):
+    '''decl : mapdecl NL'''
+    p[0] = (p[1])
 
 
 def p_mapdecl(p):
@@ -217,7 +215,7 @@ def p_numtype(p):
 def p_uncertaintype(p):
     ''' uncertaintype : UNCERTAIN LT numtype GT'''
     # TODO construct AST with uncertain information
-    p[0] = "Uncertain< " + p[3] + " >"
+    p[0] = p[3]
 
 
 def p_init(p):

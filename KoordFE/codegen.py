@@ -312,13 +312,16 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                      MULTI_READER: "public",
                      CONTROLLER: "public"}[inputAst.scope]
 
-        javatype = {'int': "Uncertain<Integer>",
-                    'boolean': "Uncertain<Boolean>",
-                    'float': "Uncertain<Float>",
-                    'ItemPosition': "Uncertain<ItemPosition>"}[inputAst.dtype]
-        javadecl = [qualifier, javatype, str(inputAst.varname)]
+        wraptype = {'int': "Integer",
+                    'boolean': "Boolean",
+                    'float': "Float",
+                    'ItemPosition': "ItemPosition"}[inputAst.dtype]
+        utype = "Uncertain<" + wraptype + ">"
+        javadecl = [qualifier, utype, str(inputAst.varname)]
         if inputAst.value:
-            javadecl.extend(['=', str(inputAst.value)]) # TODO new object instead
+            new = "new Pointmass<" + wraptype + ">" + \
+                  "(" + str(inputAst.value) + ")"
+            javadecl.extend(['=', new])
         javadecl.append(';')
         s = mkindent(' '.join(javadecl), tabs)
     return s

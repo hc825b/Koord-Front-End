@@ -349,11 +349,14 @@ def p_bval(p):
     p[0] = exprAst('bval', p[1])
 
 
-def p_num(p):
-    '''num : INUM
-           | FNUM
-    '''
-    p[0] = exprAst('num', p[1])
+def p_num_integer(p):
+    '''num : INUM'''
+    p[0] = exprAst('inum', p[1])
+
+
+def p_num_floating(p):
+    '''num : FNUM'''
+    p[0] = exprAst('fnum', p[1])
 
 
 def p_varname(p):

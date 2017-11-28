@@ -10,6 +10,10 @@ moduleprefix = {'Motion': 'gvh.plat.moat.'}
 initdict = {'Motion': "MotionParameters.Builder settings = new MotionParameters.Builder();\nsettings.COLAVOID_MODE(COLAVOID_MODE_TYPE.USE_COLBACK);\nMotionParameters param = settings.build();\ngvh.plat.moat.setParameters(param);\n", 'Trivial': ""}
 
 
+def toFloat(num):
+    return str(num) + 'F'
+
+
 def flagCodeGen(flags):
     m = ""
     for flag in flags[0]:
@@ -75,9 +79,7 @@ def getVars(expr):
         return []
     elif expr.get_type() == 'var':
         return [expr.lexp]
-    elif expr.get_type() == 'num':
-        return []
-    elif expr.get_type() == 'bval':
+    elif expr.get_type() in ['inum', 'fnum', 'bval']:
         return []
     else:
         return getVars(expr.lexp) + getVars(expr.rexp)
@@ -231,15 +233,23 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                 return modulePrefix + str(inputAst)
             else:
                 return str(inputAst)
-    if inputAst.get_type() == 'num':
+    if inputAst.get_type() == 'inum':
         return str(inputAst)
+    if inputAst.get_type() == 'fnum':
+        return toFloat(inputAst)
     if inputAst.get_type() == 'bval':
         return str(inputAst)
     if inputAst.get_type() == 'var':
         return str(inputAst)
 
     if inputAst.get_type() == 'arith':
-        return codeGen(inputAst.lexp, 0, symtab) + " " + str(inputAst.op) + " " + codeGen(inputAst.rexp, 0, symtab)
+        uop = {'+': "opPlus",
+               '-': "opMinus",
+               '*': "opTimes",
+               '/': "opDivBy"}[inputAst.op]
+        lexpr = codeGen(inputAst.lexp, 0, symtab)
+        rexpr = codeGen(inputAst.rexp, 0, symtab)
+        return "Uncertain." + uop + '(' + lexpr + ", " + rexpr + ')'
 
     if inputAst.get_type() == inittype:
         for stmt in inputAst.stmts:
@@ -255,7 +265,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         for stmt in event.eff:
             #s+= str(stmt)
             s += codeGen(stmt, tabs + 1, symtab)
-            s += mkindent("continue;\n", tabs + 1)
+            #s += mkindent("continue;\n", tabs + 1)
         s += mkindent("}", tabs)
 
     if inputAst.get_type() == condtype:
@@ -315,21 +325,21 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                      MULTI_READER: "public",
                      CONTROLLER: "public"}[inputAst.scope]
 
-        wraptype = {'int': "Integer",
-                    'boolean': "Boolean",
-                    'float': "Float",
-                    'ItemPosition': "ItemPosition"}[inputAst.dtype]
-        utype = "Uncertain<" + wraptype + ">"
-        javadecl = [qualifier, utype, str(inputAst.varname)]
+        # wraptype = {'int': "Integer",
+        #            'boolean': "Boolean",
+        #            'float': "Float",
+        #            'ItemPosition': "ItemPosition"}[inputAst.dtype]
+        # utype = "Uncertain<" + wraptype + ">"
+        javadecl = [qualifier, inputAst.dtype, str(inputAst.varname)]
 
         if inputAst.value:
             value = {'int': str(inputAst.value),
                      'boolean': str(inputAst.value),
-                     'float': str(inputAst.value) + 'F',
+                     'float': toFloat(inputAst.value),
                      'ItemPosition': "new ItemPosition(" + str(inputAst.value) + ")"
-                    }[inputAst.dtype]
-            new = "Uncertain.newConstant(" + value + ")"
-            javadecl.extend(['=', new])
+                     }[inputAst.dtype]
+            # new = "Uncertain.newConstant(" + value + ")"
+            javadecl.extend(['=', value])
         javadecl.append(';')
         s = mkindent(' '.join(javadecl), tabs)
     return s

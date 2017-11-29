@@ -1,0 +1,3 @@
+# Ignore all automatically generated Java files for simulating apps
+*
+!.gitignore

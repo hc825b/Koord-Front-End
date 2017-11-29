@@ -7,8 +7,8 @@ cd KoordFE
 python parser.py $1
 an="$(echo $1 | cut -d '.' -f 1)"
 
-mkdir ../src/main/java/testSim/$an
-mv *.java ../src/main/java/testSim/$an
+mkdir ../src/main/java/testSim/apps/$an
+mv *.java ../src/main/java/testSim/apps/$an
 cd ..
 mvn compile 
 mvn install

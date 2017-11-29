@@ -1,0 +1,34 @@
+agent Testoplocal
+
+using module Trivial:
+    actuators:
+        pass
+    sensors:
+        pass
+
+allwrite:
+  pass
+
+allread:
+  pass
+
+
+local:
+  boolean added = false
+  int finalsum
+  float f = 0.0
+
+init:
+  pass
+
+event1:
+  pre:(true)
+  eff:
+    finalsum = finalsum + 1
+    f = f + 1.0
+
+event2:
+  pre:(false)
+  eff:
+    finalsum = finalsum + 2
+    f = f + 2.0

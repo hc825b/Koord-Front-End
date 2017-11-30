@@ -251,8 +251,8 @@ def p_effblock_stmts(p):
 
 
 def p_cond(p):
-    '''cond : cond_exp'''
-    p[0] = p[1]
+    '''cond : logic_exp'''
+    p[0] = conditionAst(p[1])
 
 
 def p_stmts(p):
@@ -316,25 +316,25 @@ precedence = (
 
 
 def p_exp(p):
-    '''exp : cond_exp'''
+    '''exp : logic_exp'''
     p[0] = p[1]
 
 
-def p_cond_exp_1(p):
-    '''cond_exp : rel_exp'''
+def p_logic_exp_1(p):
+    '''logic_exp : rel_exp'''
     p[0] = p[1]
 
 
-def p_cond_exp_2(p):
-    '''cond_exp : NOT cond_exp'''
-    p[0] = exprAst('cond', p[2], None, p[1])
+def p_logic_exp_2(p):
+    '''logic_exp : NOT logic_exp'''
+    p[0] = exprAst('logic', p[2], None, p[1])
 
 
-def p_cond_exp_3(p):
-    '''cond_exp : cond_exp AND cond_exp
-                | cond_exp OR cond_exp
+def p_logic_exp_3(p):
+    '''logic_exp : logic_exp AND logic_exp
+                 | logic_exp OR logic_exp
     '''
-    p[0] = exprAst('cond', p[1], p[3], p[2])
+    p[0] = exprAst('logic', p[1], p[3], p[2])
 
 
 def p_rel_exp_1(p):

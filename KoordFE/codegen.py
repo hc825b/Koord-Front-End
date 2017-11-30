@@ -256,12 +256,11 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
             s += codeGen(stmt, tabs)
     if inputAst.get_type() == evnttype:
         event = inputAst
-        vs = getVars(event.pre)
+        vs = getVars(event.pre.exp)
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
         # print(event)
-        ucond = "Uncertain.probability(" + codeGen(event.pre, 0, symtab) + ")"
-        s += mkindent("if (" + ucond + " >= 0.5F){\n", tabs)
+        s += mkindent("if (" + codeGen(event.pre, 0, symtab) + "){\n", tabs)
 
         for stmt in event.eff:
             #s+= str(stmt)
@@ -269,13 +268,15 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
             #s += mkindent("continue;\n", tabs + 1)
         s += mkindent("}", tabs)
 
-    if inputAst.get_type() in ['cond', 'rel']:
-        cond = inputAst
-        if cond.rexp is not None:
-            s += "(" + codeGen(cond.lexp, 0, symtab) + \
-                str(cond.op) + codeGen(cond.rexp, 0, symtab) + ")"
-        elif cond.op is not None:
-            s += "(" + str(cond.op) + codeGen(cond.lexp, 0, symtab) + ")"
+    if inputAst.get_type() == 'condition':
+        return "Uncertain.conditional(" + codeGen(inputAst.exp,0,symtab) + ")"
+
+    if inputAst.get_type() in ['logic', 'rel']:
+        if inputAst.rexp is not None:
+            s += "(" + codeGen(inputAst.lexp, 0, symtab) + \
+                str(inputAst.op) + codeGen(inputAst.rexp, 0, symtab) + ")"
+        elif inputAst.op is not None:
+            s += "(" + str(inputAst.op) + codeGen(inputAst.lexp, 0, symtab) + ")"
         else:
             raise RuntimeError(
                 "Operator for boolean expression is not logical or relational operator")
@@ -310,12 +311,11 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         s += mkindent(putCodeGen(lv, symtab), tabs)
         # print(s)
     if inputAst.get_type() == 'ite':
-        vs = getVars(inputAst.cond)
+        vs = getVars(inputAst.cond.exp)
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
 
-        ucond = "Uncertain.probability(" + codeGen(inputAst.cond, tabs) + ")"
-        istr = "if(" + ucond + " >= 0.5F){\n"
+        istr = "if(" + codeGen(inputAst.cond, tabs) + "){\n"
         for stmt in inputAst.t:
             istr += codeGen(stmt, 1, symtab)
         istr += "}\n"

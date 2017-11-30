@@ -261,6 +261,20 @@ class eventAst(AstBase):
         return visitor.traverseEvent(self)
 
 
+class conditionAst(AstBase):
+    def __init__(self, logicexp):
+        self.exp = logicexp
+
+    def __repr__(self):
+        return "(" + str(self.exp) + ")"
+
+    def get_type(self):
+        return 'condition'
+
+    def accept(self, visitor):
+        raise NotImplementedError # TODO
+
+
 class exprAst(AstBase):
     def __init__(self, etype, lexp, rexp=None, op=None):
         self.etype = etype

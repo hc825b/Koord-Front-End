@@ -268,7 +268,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
             #s += mkindent("continue;\n", tabs + 1)
         s += mkindent("}", tabs)
 
-    if inputAst.get_type() == condtype:
+    if inputAst.get_type() in ['cond', 'rel']:
         cond = inputAst
         if cond.rexp is not None:
             s += "(" + codeGen(cond.lexp, 0, symtab) + \
@@ -276,7 +276,8 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         elif cond.op is not None:
             s += "(" + str(cond.op) + codeGen(cond.lexp, 0, symtab) + ")"
         else:
-            s += "(" + codeGen(cond.lexp, 0, symtab) + ")"
+            raise RuntimeError("Operator for boolean expression is not logical or relational operator")
+
     if inputAst.get_type() == 'pass':
         s += ""
     if inputAst.get_type() == atomictype:

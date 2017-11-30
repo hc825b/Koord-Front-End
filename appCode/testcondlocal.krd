@@ -1,0 +1,43 @@
+agent Testcondlocal
+
+using module Trivial:
+    actuators:
+        pass
+    sensors:
+        pass
+
+allwrite:
+  pass
+
+allread:
+  pass
+
+
+local: 
+  int sum = 0 
+  int numadded = 0   
+  boolean added = false
+  int finalsum 
+ 
+init:
+  pass
+
+adding:
+  pre:(!added)
+  eff :
+      sum = sum + (pid * 2)  
+      numadded = numadded + 1
+      added = (true || added)
+        
+added:
+  pre:(added && (numadded < numBots))
+  eff :
+      if true:
+        added = added
+      else:
+        pass
+
+finalsum:
+  pre:(numadded == numBots)
+  eff :
+      finalsum = sum 

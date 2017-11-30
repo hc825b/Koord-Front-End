@@ -260,7 +260,8 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
         # print(event)
-        s += mkindent("if (" + codeGen(event.pre, 0, symtab) + "){\n", tabs)
+        ucond = "Uncertain.probability(" + codeGen(event.pre, 0, symtab) + ")"
+        s += mkindent("if (" + ucond + " >= 0.5F){\n", tabs)
 
         for stmt in event.eff:
             #s+= str(stmt)
@@ -276,7 +277,8 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         elif cond.op is not None:
             s += "(" + str(cond.op) + codeGen(cond.lexp, 0, symtab) + ")"
         else:
-            raise RuntimeError("Operator for boolean expression is not logical or relational operator")
+            raise RuntimeError(
+                "Operator for boolean expression is not logical or relational operator")
 
     if inputAst.get_type() == 'pass':
         s += ""
@@ -311,7 +313,9 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         vs = getVars(inputAst.cond)
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
-        istr = "if" + codeGen(inputAst.cond, tabs) + "{\n"
+
+        ucond = "Uncertain.probability(" + codeGen(inputAst.cond, tabs) + ")"
+        istr = "if(" + ucond + " >= 0.5F){\n"
         for stmt in inputAst.t:
             istr += codeGen(stmt, 1, symtab)
         istr += "}\n"

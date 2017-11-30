@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.github.hc825b</groupId>
             <artifactId>Uncertain-T-for-Java</artifactId>
-            <version>8c525a9</version>
+            <version>f109c12</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

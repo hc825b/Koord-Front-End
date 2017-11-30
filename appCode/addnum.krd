@@ -27,7 +27,7 @@ adding:
       atomic: 
          sum = sum + (pid * 2)  
          numadded = numadded + 1
-         added = true 
+         added = (true || added)
         
 added:
   pre:(added && (numadded < numBots))

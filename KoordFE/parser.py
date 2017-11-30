@@ -6,7 +6,7 @@ from ast import *
 from codegen import *
 from symtab import *
 
-wnum = 0 # TODO remove global variables
+wnum = 0  # TODO remove global variables
 symtab = []
 
 
@@ -253,18 +253,8 @@ def p_effblock_stmts(p):
 
 
 def p_cond(p):
-    '''cond : LPAR cond AND cond RPAR
-            | LPAR cond OR cond RPAR
-            | LPAR cond op cond RPAR
-            | LPAR NOT cond RPAR
-            | exp
-    '''
-    if len(p) == 6:
-        p[0] = condAst(p[2], p[4], p[3])
-    elif len(p) == 5:
-        p[0] = condAst(p[3], None, p[2])
-    else:
-        p[0] = condAst(p[1], None, None)
+    '''cond : cond_exp'''
+    p[0] = p[1]
 
 
 def p_stmts(p):
@@ -317,30 +307,85 @@ def p_asgn(p):
     p[0] = asgnAst(p[1], p[3])
 
 
-precedence = (('left', 'PLUS', 'MINUS'),
-              ('left', 'TIMES', 'BY'))
+precedence = (
+    ('left', 'OR'),
+    ('left', 'AND'),
+    ('right', 'NOT'),
+    ('nonassoc', 'EQ', 'NEQ', 'GEQ', 'LEQ', 'GT', 'LT'),
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'BY')
+)
 
 
 def p_exp(p):
-    '''exp : bracketexp
-           | exp PLUS exp
-           | exp TIMES exp
-           | exp MINUS exp
-           | exp BY exp
-           | varname
-           | bval
-           | num
-           | funccall
+    '''exp : cond_exp'''
+    p[0] = p[1]
+
+
+def p_cond_exp_1(p):
+    '''cond_exp : rel_exp'''
+    p[0] = p[1]
+
+
+def p_cond_exp_2(p):
+    '''cond_exp : NOT cond_exp'''
+    p[0] = exprAst('cond', p[2], None, p[1])
+
+
+def p_cond_exp_3(p):
+    '''cond_exp : cond_exp AND cond_exp
+                | cond_exp OR cond_exp
     '''
-
-    if len(p) is 4:
-        p[0] = exprAst('arith', p[1], p[3], p[2])
-    else:
-        p[0] = p[1]
+    p[0] = exprAst('cond', p[1], p[3], p[2])
 
 
-def p_bracketexp(p):
-    '''bracketexp : LPAR exp RPAR '''
+def p_rel_exp_1(p):
+    '''rel_exp : arith_exp'''
+    p[0] = p[1]
+
+
+def p_rel_exp_2(p):
+    '''rel_exp : arith_exp relop arith_exp'''
+    p[0] = exprAst('rel', p[1], p[3], p[2])
+
+
+def p_arith_exp_1(p):
+    '''arith_exp : unary_exp'''
+    p[0] = p[1]
+
+
+def p_arith_exp_2(p):
+    '''arith_exp : arith_exp PLUS arith_exp
+                 | arith_exp TIMES arith_exp
+                 | arith_exp MINUS arith_exp
+                 | arith_exp BY arith_exp
+    '''
+    p[0] = exprAst('arith', p[1], p[3], p[2])
+
+
+def p_unary_exp_1(p):
+    '''unary_exp : primary_exp'''
+    p[0] = p[1]
+
+
+def p_unary_exp_2(p):
+    '''unary_exp : PLUS unary_exp
+                 | MINUS unary_exp
+    '''
+    p[0] = exprAst('unary', p[2], None, p[1])
+
+
+def p_primary_exp_1(p):
+    '''primary_exp : varname
+                   | bval
+                   | num
+                   | funccall
+    '''
+    p[0] = p[1]
+
+
+def p_primary_exp_2(p):
+    '''primary_exp : LPAR exp RPAR'''
     p[0] = p[2]
 
 
@@ -365,13 +410,13 @@ def p_varname(p):
     p[0] = exprAst('var', p[1])
 
 
-def p_op(p):
-    '''op : EQ
-          | NEQ
-          | GEQ
-          | LEQ
-          | GT
-          | LT
+def p_relop(p):
+    '''relop : EQ
+             | NEQ
+             | GEQ
+             | LEQ
+             | GT
+             | LT
     '''
     p[0] = p[1]
 

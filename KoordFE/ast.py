@@ -13,8 +13,6 @@ rvdecltype = 'rvdecl'
 inittype = 'init'
 evnttype = 'evnt'
 moduletype = 'mdl'
-condtype = 'cond'
-exprtype = 'expr'
 functype = 'func'
 atomictype = 'atom'
 
@@ -261,35 +259,6 @@ class eventAst(AstBase):
 
     def accept(self, visitor):
         return visitor.traverseEvent(self)
-
-
-class condAst(AstBase): # TODO Inherit from exprAst
-    def __init__(self, lexp, rexp=None, op=None):
-        self.lexp = lexp
-        self.rexp = rexp
-        self.op = op
-
-    def __repr__(self):
-        if self.rexp is not None:
-            return "( " + str(self.lexp) + " " + str(self.op) + " " + str(self.rexp) + " )"
-        if self.op is not None:
-            return "(" + str(self.op) + "( " + str(self.lexp) + " )" + ")"
-        else:
-            return "(" + str(self.lexp) + ")"
-
-    def get_type(self):
-        return condtype
-
-    def accept(self, visitor):
-        if self.op == '||':
-            return visitor.traverseOrExpr(self)
-        if self.op == '&&':
-            return visitor.traverseAndExpr(self)
-        if self.op == '!':
-            return visitor.traverseNotExpr(self)
-        # TODO It is too troublesome to refactor condition expressions without
-        # breaking original code generation. Do it some other day
-        raise RuntimeError(str(self))
 
 
 class exprAst(AstBase):

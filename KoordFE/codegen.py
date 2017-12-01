@@ -57,8 +57,7 @@ def impCodeGen():
     s += "import edu.illinois.mitra.cyphyhouse.gvh.GlobalVarHolder;\n"
     s += "import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;\n"
-    s += "\n"
-    s += "import edu.illinois.uncertain.Uncertain;\n"
+    s += "import edu.illinois.mitra.cyphyhouse.objects.UncertainWrapper;\n"
     s += "\n"
     return s
 
@@ -161,7 +160,7 @@ def getCodeGen(v, symtab):
             readVal = lambda e: cast(e.dtype) + '(' + readStr(e) + ')'
             # XXX e.varname is also provided as argument because we need the
             # type of the receiving variable to call overloaded function.
-            readUVal = lambda e: "Uncertain.newValue(" + str(e.varname) + ", " + readVal(e) + ')'
+            readUVal = lambda e: "UncertainWrapper.newValue(" + str(e.varname) + ", " + readVal(e) + ')'
             return str(e.varname) + " = " + readUVal(e) + ';'
         return ""
     return ""
@@ -169,7 +168,7 @@ def getCodeGen(v, symtab):
 
 def putCodeGen(lv, symtab):
     if lv.scope is not LOCAL:
-        sampleUVal = "Uncertain.getValue(" + str(lv.varname) + ")"
+        sampleUVal = "UncertainWrapper.getValue(" + str(lv.varname) + ")"
         return ('dsm.put("' + str(lv.varname) + '", "' + str(lv.owner) + '", ' + sampleUVal + ");")
     return ""
 
@@ -255,7 +254,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                '/': "opDivBy"}[inputAst.op]
         lexpr = codeGen(inputAst.lexp, 0, symtab)
         rexpr = codeGen(inputAst.rexp, 0, symtab)
-        return "Uncertain." + uop + '(' + lexpr + ", " + rexpr + ')'
+        return "UncertainWrapper." + uop + '(' + lexpr + ", " + rexpr + ')'
 
     if inputAst.get_type() == inittype:
         for stmt in inputAst.stmts:
@@ -275,7 +274,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         s += mkindent("}", tabs)
 
     if inputAst.get_type() == 'condition':
-        return "Uncertain.conditional(" + codeGen(inputAst.exp,0,symtab) + ")"
+        return "UncertainWrapper.conditional(" + codeGen(inputAst.exp,0,symtab) + ")"
 
     if inputAst.get_type() in ['logic', 'rel']:
         if inputAst.rexp is not None:
@@ -349,7 +348,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                      'float': toFloat(inputAst.value),
                      'ItemPosition': "new ItemPosition(" + str(inputAst.value) + ")"
                      }[inputAst.dtype]
-            # new = "Uncertain.newConstant(" + value + ")"
+            # new = "UncertainWrapper.newConstant(" + value + ")"
             javadecl.extend(['=', value])
         javadecl.append(';')
         s = mkindent(' '.join(javadecl), tabs)

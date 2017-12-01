@@ -149,15 +149,20 @@ def mkDsms(symtab):
 
 
 def cast(dtype):
-    if dtype == 'int':
-        return "Integer.parseInt"
+    return {'int': "Integer.parseInt",
+            'float': "Float.parseFloat"}[dtype]
 
 
 def getCodeGen(v, symtab):
     e = getEntry(v, symtab)
     if e is not None:
         if e.scope is not LOCAL:
-            return str(e.varname) + " = " + cast(e.dtype) + "(" + "dsm.get(" + '"' + str(e.varname) + '","' + str(e.owner) + '"' + "));"
+            readStr = lambda e: 'dsm.get("' + str(e.varname) + '", "' + str(e.owner) + '")'
+            readVal = lambda e: cast(e.dtype) + '(' + readStr(e) + ')'
+            # XXX e.varname is also provided as argument because we need the
+            # type of the receiving variable to call overloaded function.
+            readUVal = lambda e: "Uncertain.newValue(" + str(e.varname) + ", " + readVal(e) + ')'
+            return str(e.varname) + " = " + readUVal(e) + ';'
         return ""
     return ""
 

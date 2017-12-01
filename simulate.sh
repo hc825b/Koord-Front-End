@@ -13,5 +13,5 @@ cd ..
 mvn compile 
 mvn install
 HOME_DIR=`echo "$HOME"`
-mvn exec:java -Dexec.mainClass="testSim.$an.Main"
+mvn exec:java -Dexec.mainClass="testSim.apps.$an.Main"
 rm $1

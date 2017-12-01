@@ -65,7 +65,7 @@ def impCodeGen():
 
 def packageNameGen(appname):
     """Generate package name and appname from the high level prog"""
-    return "package testSim." + appname.lower() + ";\n\n"
+    return "package testSim.apps." + appname.lower() + ";\n\n"
 
 
 def classGen(appname):
@@ -357,7 +357,7 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
 
 def mainCodeGen(name, drawname):
 
-    s = "package testSim." + name.lower() + ";\n\n"
+    s = packageNameGen(name)
 
     s += "import testSim.main.SimSettings;\n"
     s += "import testSim.main.Simulation;\n"
@@ -384,7 +384,7 @@ def mainCodeGen(name, drawname):
 
 
 def drawCodeGen(name):
-    s = 'package testSim.' + str(name).lower() + ';'
+    s = packageNameGen(name)
 
     s += 'import java.awt.BasicStroke;\n'
     s += 'import java.awt.Color;\n'

@@ -169,7 +169,8 @@ def getCodeGen(v, symtab):
 
 def putCodeGen(lv, symtab):
     if lv.scope is not LOCAL:
-        return ("dsm.put(" + '"' + str(lv.varname) + '","' + str(lv.owner) + '"' + "," + str(lv.varname) + ");")
+        sampleUVal = "Uncertain.getValue(" + str(lv.varname) + ")"
+        return ('dsm.put("' + str(lv.varname) + '", "' + str(lv.owner) + '", ' + sampleUVal + ");")
     return ""
 
 

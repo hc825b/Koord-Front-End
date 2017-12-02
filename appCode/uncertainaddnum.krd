@@ -1,4 +1,4 @@
-agent Uncertainaddnum 
+agent Uncertainaddnum
 
 using module Trivial:
     actuators:
@@ -7,34 +7,34 @@ using module Trivial:
         pass
 
 allwrite:
-  int sum = 0 
-  int numadded = 0   
+  Uncertain<int> sum = 0
+  int numadded = 0
 
 allread:
   pass
 
 
-local: 
+local:
   boolean added = false
-  Uncertain<int> finalsum 
- 
+  Uncertain<int> finalsum
+
 init:
   pass
 
 adding:
   pre:(!added)
   eff :
-      atomic: 
-         sum = sum + (pid * 2)  
+      atomic:
+         sum = sum + (pid * 2)
          numadded = numadded + 1
-         added = true 
-        
+         added = true
+
 added:
   pre:(added && (numadded < numBots))
   eff :
-      pass 
+      pass
 
 finalsum:
   pre:(numadded == numBots)
   eff :
-      finalsum = sum 
+      finalsum = sum

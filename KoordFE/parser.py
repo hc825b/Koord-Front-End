@@ -215,7 +215,7 @@ def p_numtype(p):
 def p_uncertaintype(p):
     ''' uncertaintype : UNCERTAIN LT numtype GT'''
     # TODO construct AST with uncertain information
-    p[0] = p[3]
+    p[0] = "u_" + p[3]
 
 
 def p_init(p):

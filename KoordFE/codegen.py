@@ -11,7 +11,7 @@ initdict = {'Motion': "MotionParameters.Builder settings = new MotionParameters.
 
 
 def toFloat(num):
-    return str(num) + 'F'
+    return "((float) " + str(num) + ")"
 
 
 def flagCodeGen(flags):
@@ -58,6 +58,8 @@ def impCodeGen():
     s += "import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.UncertainWrapper;\n"
+    s += "\n"
+    s += "import edu.illinois.uncertain.Uncertain;\n"
     s += "\n"
     return s
 
@@ -132,10 +134,11 @@ def mandatoryInits(pgmast, tabs, wnum):
 
 def createval(dtype):
     """Cast primitive types"""
-    if dtype == 'int':
-        return 0
-    if dtype == 'float':
-        return 0.0
+    if dtype in ['int', 'u_int']:
+        return "0"
+    if dtype in ['float', 'u_float']:
+        return "0.0F"
+    # TODO support String and ItemPosition
 
 
 def mkDsms(symtab):
@@ -148,8 +151,12 @@ def mkDsms(symtab):
 
 
 def cast(dtype):
+    # TODO Support ItemPosition and String
     return {'int': "Integer.parseInt",
-            'float': "Float.parseFloat"}[dtype]
+            'u_int': "Integer.parseInt",
+            'float': "Float.parseFloat",
+            'u_float': "Float.parseFloat",
+            }[dtype]
 
 
 def getCodeGen(v, symtab):
@@ -335,20 +342,30 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                      MULTI_READER: "public",
                      CONTROLLER: "public"}[inputAst.scope]
 
-        # wraptype = {'int': "Integer",
-        #            'boolean': "Boolean",
-        #            'float': "Float",
-        #            'ItemPosition': "ItemPosition"}[inputAst.dtype]
-        # utype = "Uncertain<" + wraptype + ">"
-        javadecl = [qualifier, inputAst.dtype, str(inputAst.varname)]
+        javatype = {'int': "int",
+                    'boolean': "boolean",
+                    'float': "float",
+                    'ItemPosition': "ItemPosition",
+                    'String': "String",
+                    'u_int': "Uncertain<Integer>",
+                    'u_boolean': "Uncertain<Boolean>",
+                    'u_float': "Uncertain<Float>",
+                    'u_ItemPosition': "Uncertain<ItemPosition>",
+                    }[inputAst.dtype]
+        javadecl = [qualifier, javatype, str(inputAst.varname)]
 
         if inputAst.value:
-            value = {'int': str(inputAst.value),
-                     'boolean': str(inputAst.value),
-                     'float': toFloat(inputAst.value),
-                     'ItemPosition': "new ItemPosition(" + str(inputAst.value) + ")"
+            valstr = str(inputAst.value)
+            value = {'int': valstr,
+                     'boolean': valstr,
+                     'float': toFloat(valstr),
+                     'ItemPosition': "new ItemPosition(" + valstr + ")",
+                     'String': '"' + valstr + '"',
+                     'u_int': "UncertainWrapper.newConstant(" + valstr + ")",
+                     'u_boolean': "UncertainWrapper.newConstant(" + valstr + ")",
+                     'u_float': "UncertainWrapper.newConstant(" + valstr + ")",
                      }[inputAst.dtype]
-            # new = "UncertainWrapper.newConstant(" + value + ")"
+            # new = "UncertainWrapper.newConstant(" + valstr + ")"
             javadecl.extend(['=', value])
         javadecl.append(';')
         s = mkindent(' '.join(javadecl), tabs)

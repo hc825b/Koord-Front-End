@@ -83,14 +83,14 @@ t_RBRACE = r'\]'
 
 # capitalized identifiers
 def t_CID(t):
-    r'[A-Z][a-zA-Z0-9\.]*'
+    r'[A-Z][a-zA-Z0-9]*'
     t.type = RESERVED.get(t.value, 'CID')
     return t
 
 
 # lowercase identifiers
 def t_LID(t):
-    r'[a-z][a-zA-Z0-9\.]*'
+    r'[a-z][a-zA-Z0-9]*'
     t.type = RESERVED.get(t.value, 'LID')
     return t
 

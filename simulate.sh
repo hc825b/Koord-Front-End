@@ -1,17 +1,8 @@
 #!/bin/sh
-cd appCode
-cp $1 ../
-cd ..
-cp $1 KoordFE/
-cd KoordFE
-python parser.py $1
-an="$(echo $1 | cut -d '.' -f 1)"
+python simulate.py $1
+an=$(basename "$1" .krd) # FIXME This doesn't work if filename is not lowercase of program name
 
-mkdir ../src/main/java/testSim/apps/$an
-mv *.java ../src/main/java/testSim/apps/$an
-cd ..
 mvn compile 
 mvn install
 HOME_DIR=`echo "$HOME"`
 mvn exec:java -Dexec.mainClass="testSim.apps.$an.Main"
-rm $1

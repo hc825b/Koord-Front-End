@@ -17,16 +17,11 @@ pip install ply
 
 # Running example apps
 
-Example Koord programs `*.krd` should be stored in `appCode` directory. To
-simulate a Koord program, e.g. `uncertainaddnum.krd`, run
+simulate a Koord program, e.g. `uncertainaddnum.krd` under `appCode/`, run
 ```
-./simulate.sh uncertainaddnum.krd
+./simulate.sh appCode/uncertainaddnum.krd
 ``` 
 
-# Debugging Java code generated from Koord code
-```
-./simulate.py appCode/uncertainaddnum.krd
-```
 -----------------------------------------------------------------------------
 
 # OLD README

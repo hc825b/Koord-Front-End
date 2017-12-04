@@ -1,0 +1,27 @@
+agent Testdecl
+
+using module Trivial:
+    actuators:
+        pass
+    sensors:
+        pass
+
+allwrite:
+  int sum = 0
+  int numadded = 0
+
+allread:
+  pass
+
+
+local:
+  boolean added = false
+  int finalsum
+  float f = 0.0
+
+init:
+  pass
+
+event1:
+  pre:(true)
+  eff: pass

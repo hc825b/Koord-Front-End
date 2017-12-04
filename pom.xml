@@ -23,7 +23,7 @@
         <dependency>
             <groupId>com.github.hc825b</groupId>
             <artifactId>Uncertain-T-for-Java</artifactId>
-            <version>master-SNAPSHOT</version>
+            <version>cf63a67</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

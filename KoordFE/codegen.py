@@ -10,6 +10,10 @@ moduleprefix = {'Motion': 'gvh.plat.moat.'}
 initdict = {'Motion': "MotionParameters.Builder settings = new MotionParameters.Builder();\nsettings.COLAVOID_MODE(COLAVOID_MODE_TYPE.USE_COLBACK);\nMotionParameters param = settings.build();\ngvh.plat.moat.setParameters(param);\n", 'Trivial': ""}
 
 
+def toFloat(num):
+    return "((float) " + str(num) + ")"
+
+
 def flagCodeGen(flags):
     m = ""
     for flag in flags[0]:
@@ -53,6 +57,9 @@ def impCodeGen():
     s += "import edu.illinois.mitra.cyphyhouse.gvh.GlobalVarHolder;\n"
     s += "import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;\n"
+    s += "import edu.illinois.mitra.cyphyhouse.objects.UncertainWrapper;\n"
+    s += "\n"
+    s += "import edu.illinois.uncertain.Uncertain;\n"
     s += "\n"
     return s
 
@@ -73,9 +80,7 @@ def getVars(expr):
         return []
     elif expr.get_type() == 'var':
         return [expr.lexp]
-    elif expr.get_type() == 'num':
-        return []
-    elif expr.get_type() == 'bval':
+    elif expr.get_type() in ['inum', 'fnum', 'bval']:
         return []
     else:
         return getVars(expr.lexp) + getVars(expr.rexp)
@@ -117,8 +122,9 @@ def mandatoryInits(pgmast, tabs, wnum):
     inits += mkindent("numBots = gvh.id.getParticipants().size();", tabs)
     flags = pgmast.getflags()
     if flags[1] == True:
+        s = ""
         for i in range(0, wnum):
-            s = "mutex" + str(i) + "= new GroupSetMutex(gvh, 0);\n"
+            s += "mutex" + str(i) + "= new GroupSetMutex(gvh, 0);\n"
         s += "dsm = new DSMMultipleAttr(gvh);"
         inits += mkindent(s, tabs)
     for module in flags[0]:
@@ -128,10 +134,11 @@ def mandatoryInits(pgmast, tabs, wnum):
 
 def createval(dtype):
     """Cast primitive types"""
-    if dtype == 'int':
-        return 0
-    if dtype == 'float':
-        return 0.0
+    if dtype in ['int', 'u_int']:
+        return "0"
+    if dtype in ['float', 'u_float']:
+        return "0.0F"
+    # TODO support String and ItemPosition
 
 
 def mkDsms(symtab):
@@ -144,22 +151,32 @@ def mkDsms(symtab):
 
 
 def cast(dtype):
-    if dtype == 'int':
-        return "Integer.parseInt"
+    # TODO Support ItemPosition and String
+    return {'int': "Integer.parseInt",
+            'u_int': "Integer.parseInt",
+            'float': "Float.parseFloat",
+            'u_float': "Float.parseFloat",
+            }[dtype]
 
 
 def getCodeGen(v, symtab):
     e = getEntry(v, symtab)
     if e is not None:
         if e.scope is not LOCAL:
-            return str(e.varname) + " = " + cast(e.dtype) + "(" + "dsm.get(" + '"' + str(e.varname) + '","' + str(e.owner) + '"' + "));"
+            readStr = lambda e: 'dsm.get("' + str(e.varname) + '", "' + str(e.owner) + '")'
+            readVal = lambda e: cast(e.dtype) + '(' + readStr(e) + ')'
+            # XXX e.varname is also provided as argument because we need the
+            # type of the receiving variable to call overloaded function.
+            readUVal = lambda e: "UncertainWrapper.newValue(" + str(e.varname) + ", " + readVal(e) + ')'
+            return str(e.varname) + " = " + readUVal(e) + ';'
         return ""
     return ""
 
 
 def putCodeGen(lv, symtab):
     if lv.scope is not LOCAL:
-        return ("dsm.put(" + '"' + str(lv.varname) + '","' + str(lv.owner) + '"' + "," + str(lv.varname) + ");")
+        sampleUVal = "UncertainWrapper.getValue(" + str(lv.varname) + ")"
+        return ('dsm.put("' + str(lv.varname) + '", "' + str(lv.owner) + '", ' + sampleUVal + ");")
     return ""
 
 
@@ -228,22 +245,30 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
                 return modulePrefix + str(inputAst)
             else:
                 return str(inputAst)
-    if inputAst.get_type() == 'num':
+    if inputAst.get_type() == 'inum':
         return str(inputAst)
+    if inputAst.get_type() == 'fnum':
+        return toFloat(inputAst)
     if inputAst.get_type() == 'bval':
         return str(inputAst)
     if inputAst.get_type() == 'var':
         return str(inputAst)
 
     if inputAst.get_type() == 'arith':
-        return codeGen(inputAst.lexp, 0, symtab) + " " + str(inputAst.op) + " " + codeGen(inputAst.rexp, 0, symtab)
+        uop = {'+': "opPlus",
+               '-': "opMinus",
+               '*': "opTimes",
+               '/': "opDivBy"}[inputAst.op]
+        lexpr = codeGen(inputAst.lexp, 0, symtab)
+        rexpr = codeGen(inputAst.rexp, 0, symtab)
+        return "UncertainWrapper." + uop + '(' + lexpr + ", " + rexpr + ')'
 
     if inputAst.get_type() == inittype:
         for stmt in inputAst.stmts:
             s += codeGen(stmt, tabs)
     if inputAst.get_type() == evnttype:
         event = inputAst
-        vs = getVars(event.pre)
+        vs = getVars(event.pre.exp)
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
         # print(event)
@@ -252,18 +277,21 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         for stmt in event.eff:
             #s+= str(stmt)
             s += codeGen(stmt, tabs + 1, symtab)
-            s += mkindent("continue;\n", tabs + 1)
+            #s += mkindent("continue;\n", tabs + 1)
         s += mkindent("}", tabs)
 
-    if inputAst.get_type() in ['cond', 'rel']:
-        cond = inputAst
-        if cond.rexp is not None:
-            s += "(" + codeGen(cond.lexp, 0, symtab) + \
-                str(cond.op) + codeGen(cond.rexp, 0, symtab) + ")"
-        elif cond.op is not None:
-            s += "(" + str(cond.op) + codeGen(cond.lexp, 0, symtab) + ")"
+    if inputAst.get_type() == 'condition':
+        return "UncertainWrapper.conditional(" + codeGen(inputAst.exp,0,symtab) + ")"
+
+    if inputAst.get_type() in ['logic', 'rel']:
+        if inputAst.rexp is not None:
+            s += "(" + codeGen(inputAst.lexp, 0, symtab) + \
+                str(inputAst.op) + codeGen(inputAst.rexp, 0, symtab) + ")"
+        elif inputAst.op is not None:
+            s += "(" + str(inputAst.op) + codeGen(inputAst.lexp, 0, symtab) + ")"
         else:
-            raise RuntimeError("Operator for boolean expression is not logical or relational operator")
+            raise RuntimeError(
+                "Operator for boolean expression is not logical or relational operator")
 
     if inputAst.get_type() == 'pass':
         s += ""
@@ -295,10 +323,11 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
         s += mkindent(putCodeGen(lv, symtab), tabs)
         # print(s)
     if inputAst.get_type() == 'ite':
-        vs = getVars(inputAst.cond)
+        vs = getVars(inputAst.cond.exp)
         for v in vs:
             s += mkindent(getCodeGen(v, symtab), tabs)
-        istr = "if" + codeGen(inputAst.cond, tabs) + "{\n"
+
+        istr = "if(" + codeGen(inputAst.cond, tabs) + "){\n"
         for stmt in inputAst.t:
             istr += codeGen(stmt, 1, symtab)
         istr += "}\n"
@@ -307,23 +336,39 @@ def codeGen(inputAst, tabs, symtab=[], wnum=0):
             istr += codeGen(stmt, 1, symtab)
         istr += "}\n"
         s += mkindent(istr, tabs)
-    elif inputAst.get_type() == 'decl':
-        qualifier = ""
-        if inputAst.scope == LOCAL:
-            qualifier = ""
-        elif inputAst.scope == MULTI_WRITER:
-            qualifier = "public"
-        elif inputAst.scope == MULTI_READER:
-            qualifier = "public"
-        elif inputAst.scope == CONTROLLER:
-            qualifier = "public"
-        # print(inputast.value)
-        if inputAst.value is None:
-            s = mkindent(qualifier + " " + str(inputAst.dtype) +
-                         " " + str(inputAst.varname) + ";", tabs)
-        else:
-            s = mkindent(qualifier + " " + str(inputAst.dtype) + " " +
-                         str(inputAst.varname) + " = " + str(inputAst.value) + ";", tabs)
+    elif inputAst.get_type() == decltype:
+        qualifier = {LOCAL: "",
+                     MULTI_WRITER: "public",
+                     MULTI_READER: "public",
+                     CONTROLLER: "public"}[inputAst.scope]
+
+        javatype = {'int': "int",
+                    'boolean': "boolean",
+                    'float': "float",
+                    'ItemPosition': "ItemPosition",
+                    'String': "String",
+                    'u_int': "Uncertain<Integer>",
+                    'u_boolean': "Uncertain<Boolean>",
+                    'u_float': "Uncertain<Float>",
+                    'u_ItemPosition': "Uncertain<ItemPosition>",
+                    }[inputAst.dtype]
+        javadecl = [qualifier, javatype, str(inputAst.varname)]
+
+        if inputAst.value:
+            valstr = str(inputAst.value)
+            value = {'int': valstr,
+                     'boolean': valstr,
+                     'float': toFloat(valstr),
+                     'ItemPosition': "new ItemPosition(" + valstr + ")",
+                     'String': '"' + valstr + '"',
+                     'u_int': "UncertainWrapper.newConstant(" + valstr + ")",
+                     'u_boolean': "UncertainWrapper.newConstant(" + valstr + ")",
+                     'u_float': "UncertainWrapper.newConstant(" + valstr + ")",
+                     }[inputAst.dtype]
+            # new = "UncertainWrapper.newConstant(" + valstr + ")"
+            javadecl.extend(['=', value])
+        javadecl.append(';')
+        s = mkindent(' '.join(javadecl), tabs)
     return s
 
 

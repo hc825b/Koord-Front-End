@@ -99,31 +99,29 @@ def p_locdecls(p):
     p[0] = p[5]
 
 
-def p_decls(p):
-    '''decls : decl decls
-            |  type varnames NL
-            | empty
-    '''
-    dlist = []
-    if len(p) == 4:
-        dlist = []
-        for varname in p[2]:
-            dlist.append(declAst(p[1], varname))
-        p[0] = dlist
-    elif len(p) == 3:
-        dlist.append(p[1])
-        dlist += p[2]
-    p[0] = dlist
+def p_decls_empty(p):
+    '''decls : empty'''
+    p[0] = []
+
+
+def p_decls_nonempty(p):
+    '''decls : decl decls'''
+    p[0] = [p[1]] + p[2]
 
 
 def p_decl(p):
-    '''decl : type varname ASGN exp NL
-            | mapdecl NL
-    '''
-    if len(p) == 3:
-        p[0] = (p[1])
-    else:
-        p[0] = (declAst(p[1], p[2], p[4]))
+    '''decl : type varname NL'''
+    p[0] = declAst(p[1], p[2])
+
+
+def p_decl_init(p):
+    '''decl : type varname ASGN exp NL'''
+    p[0] = (declAst(p[1], p[2], p[4]))
+
+
+def p_decl_map(p):
+    '''decl : mapdecl NL'''
+    p[0] = (p[1])
 
 
 def p_mapdecl(p):
@@ -217,7 +215,7 @@ def p_numtype(p):
 def p_uncertaintype(p):
     ''' uncertaintype : UNCERTAIN LT numtype GT'''
     # TODO construct AST with uncertain information
-    p[0] = "Uncertain< " + p[3] + " >"
+    p[0] = "u_" + p[3]
 
 
 def p_init(p):
@@ -253,8 +251,8 @@ def p_effblock_stmts(p):
 
 
 def p_cond(p):
-    '''cond : cond_exp'''
-    p[0] = p[1]
+    '''cond : logic_exp'''
+    p[0] = conditionAst(p[1])
 
 
 def p_stmts(p):
@@ -318,25 +316,25 @@ precedence = (
 
 
 def p_exp(p):
-    '''exp : cond_exp'''
+    '''exp : logic_exp'''
     p[0] = p[1]
 
 
-def p_cond_exp_1(p):
-    '''cond_exp : rel_exp'''
+def p_logic_exp_1(p):
+    '''logic_exp : rel_exp'''
     p[0] = p[1]
 
 
-def p_cond_exp_2(p):
-    '''cond_exp : NOT cond_exp'''
-    p[0] = exprAst('cond', p[2], None, p[1])
+def p_logic_exp_2(p):
+    '''logic_exp : NOT logic_exp'''
+    p[0] = exprAst('logic', p[2], None, p[1])
 
 
-def p_cond_exp_3(p):
-    '''cond_exp : cond_exp AND cond_exp
-                | cond_exp OR cond_exp
+def p_logic_exp_3(p):
+    '''logic_exp : logic_exp AND logic_exp
+                 | logic_exp OR logic_exp
     '''
-    p[0] = exprAst('cond', p[1], p[3], p[2])
+    p[0] = exprAst('logic', p[1], p[3], p[2])
 
 
 def p_rel_exp_1(p):
@@ -396,11 +394,14 @@ def p_bval(p):
     p[0] = exprAst('bval', p[1])
 
 
-def p_num(p):
-    '''num : INUM
-           | FNUM
-    '''
-    p[0] = exprAst('num', p[1])
+def p_num_integer(p):
+    '''num : INUM'''
+    p[0] = exprAst('inum', p[1])
+
+
+def p_num_floating(p):
+    '''num : FNUM'''
+    p[0] = exprAst('fnum', p[1])
 
 
 def p_varname(p):

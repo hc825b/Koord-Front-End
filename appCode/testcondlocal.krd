@@ -1,4 +1,4 @@
-agent Uncertainaddnum
+agent Testcondlocal
 
 using module Trivial:
     actuators:
@@ -7,16 +7,17 @@ using module Trivial:
         pass
 
 allwrite:
-  Uncertain<int> sum = 0
-  int numadded = 0
+  pass
 
 allread:
   pass
 
 
 local:
+  int sum = 0
+  int numadded = 0
   boolean added = false
-  Uncertain<int> finalsum
+  int finalsum
 
 init:
   pass
@@ -24,15 +25,17 @@ init:
 adding:
   pre:(!added)
   eff :
-      atomic:
-         sum = sum + (pid * 2)
-         numadded = numadded + 1
-         added = true
+      sum = sum + (pid * 2)
+      numadded = numadded + 1
+      added = (true || added)
 
 added:
   pre:(added && (numadded < numBots))
   eff :
-      pass
+      if true:
+        added = added
+      else:
+        pass
 
 finalsum:
   pre:(numadded == numBots)

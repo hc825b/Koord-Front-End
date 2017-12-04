@@ -34,17 +34,18 @@ tokens = [
 ] + list(RESERVED.values())
 
 
+# decimal numbers. Note that this rule is before integer numbers so that this
+# rule is attempted first
+def t_FNUM(t):
+    r'[-]?[0-9]+[.][0-9]+'
+    t.value = float(t.value)
+    return t
+
+
 # integer numbers
 def t_INUM(t):
     r'[-]?[0-9]+'
     t.value = int(t.value)
-    return t
-
-
-# decimal numbers
-def t_FNUM(t):
-    r'[-]?[0-9]+([.][0-9]+)?'
-    t.value = float(t.value)
     return t
 
 
@@ -82,14 +83,14 @@ t_RBRACE = r'\]'
 
 # capitalized identifiers
 def t_CID(t):
-    r'[A-Z][a-zA-Z0-9\.]*'
+    r'[A-Z][a-zA-Z0-9]*'
     t.type = RESERVED.get(t.value, 'CID')
     return t
 
 
 # lowercase identifiers
 def t_LID(t):
-    r'[a-z][a-zA-Z0-9\.]*'
+    r'[a-z][a-zA-Z0-9]*'
     t.type = RESERVED.get(t.value, 'LID')
     return t
 

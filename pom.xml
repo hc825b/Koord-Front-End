@@ -10,6 +10,10 @@
 
     <repositories>
         <repository>
+              <id>Local repository</id>
+              <url>file://${basedir}</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -35,18 +39,14 @@
         </dependency>
         <!-- Following are external jars added to the project -->
         <dependency>
-            <groupId>lib_kd</groupId>
-            <artifactId>lib_kd</artifactId>
+            <groupId>lib</groupId>
+            <artifactId>kd</artifactId>
             <version>0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/kd.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>lib_yadrone_self</groupId>
-            <artifactId>lib_yadrone_self</artifactId>
+            <groupId>lib</groupId>
+            <artifactId>yadrone_self</artifactId>
             <version>0.1</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/yadrone_self.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

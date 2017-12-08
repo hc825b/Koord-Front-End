@@ -1,7 +1,5 @@
 package edu.illinois.mitra.cyphyhouse.objects;
 
-import edu.illinois.uncertain.Uncertain;
-
 /**
  * This wrapper class provides overloaded static functions for both primitive
  * type and Uncertain<T> type to simplify the code generation pass

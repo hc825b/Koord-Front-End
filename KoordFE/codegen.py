@@ -57,9 +57,8 @@ def impCodeGen():
     s += "import edu.illinois.mitra.cyphyhouse.gvh.GlobalVarHolder;\n"
     s += "import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;\n"
+    s += "import edu.illinois.mitra.cyphyhouse.objects.Uncertain;\n"
     s += "import edu.illinois.mitra.cyphyhouse.objects.UncertainWrapper;\n"
-    s += "\n"
-    s += "import edu.illinois.uncertain.Uncertain;\n"
     s += "\n"
     return s
 

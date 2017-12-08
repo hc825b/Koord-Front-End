@@ -17,18 +17,9 @@
             <id>local_repository</id>
             <url>file://${project.basedir}/lib</url>
         </repository>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>com.github.hc825b</groupId>
-            <artifactId>Uncertain-T-for-Java</artifactId>
-            <version>cf63a67</version>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

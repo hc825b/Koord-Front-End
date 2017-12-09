@@ -218,11 +218,14 @@ def p_uncertaintype(p):
     p[0] = "u_" + p[3]
 
 
-def p_init(p):
-    '''init : INIT COLON NL INDENT stmts DEDENT
-            | empty
-    '''
+def p_init_block(p):
+    '''init : INIT COLON NL INDENT stmts DEDENT'''
     p[0] = p[5]
+
+
+def p_init_empty(p):
+    '''init : empty'''
+    p[0] = []
 
 
 def p_events(p):

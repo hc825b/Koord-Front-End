@@ -1,0 +1,19 @@
+agent TestMapdecl
+
+
+allwrite:
+  pass
+
+allread:
+  pass
+
+
+local:
+  map<int, int> m
+
+init:
+  pass
+
+event1:
+  pre:(true)
+  eff: pass

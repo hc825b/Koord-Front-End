@@ -11,8 +11,7 @@ symtab = []
 
 
 def p_program(p):
-    '''program : agent modules awdecls ardecls locdecls init events
-    '''
+    '''program : agent modules awdecls ardecls locdecls init events'''
     p[0] = pgmAst(p[1], p[2], p[3], p[4], p[5], p[6], p[7])
 
 
@@ -21,18 +20,19 @@ def p_agent(p):
     p[0] = p[2]
 
 
-def p_modules(p):
-    '''modules : module modules
-               | module
-    '''
-    mlist = [p[1]]
-    if len(p) == 3:
-        mlist += p[2]
-    p[0] = mlist
+def p_modules_empty(p):
+    '''modules : empty'''
+    p[0] = []
+
+
+def p_modules_list(p):
+    '''modules : module modules'''
+    p[0] = [p[1]] + p[2]
 
 
 def p_module(p):
     '''module : USING MODULE CID COLON NL INDENT actuatordecls sensordecls DEDENT'''
+    # TODO Move symtab generation to another phase
     for decl in p[7] + p[8]:
         entry = mkEntry(decl)
         entry.set_module(p[2])
@@ -59,9 +59,8 @@ def p_sensordecls(p):
 def p_awdecls(p):
     '''awdecls : ALLWRITE COLON NL INDENT decls DEDENT
                | ALLWRITE COLON NL INDENT passdecls DEDENT'''
-    # print(p[5])
+    # TODO Move symtab generation to another phase
     for decl in p[5]:
-        # print(decl)
         decl.set_scope(MULTI_WRITER)
         global symtab
         symtab.append(mkEntry(decl))
@@ -71,9 +70,8 @@ def p_awdecls(p):
 def p_ardecls(p):
     '''ardecls : ALLREAD COLON NL INDENT rvdecls DEDENT
                | ALLREAD COLON NL INDENT passdecls DEDENT'''
-    # print(p[5])
+    # TODO Move symtab generation to another phase
     for decl in p[5]:
-        # print(decl)
         decl.set_scope(MULTI_READER)
         global symtab
         symtab.append(mkEntry(decl))
@@ -88,6 +86,7 @@ def p_passdecls(p):
 def p_locdecls(p):
     '''locdecls : LOCAL COLON NL INDENT decls DEDENT
                 | LOCAL COLON NL INDENT passdecls DEDENT'''
+    # TODO Move symtab generation to another phase
     for decl in p[5]:
         global symtab
         symtab.append(mkEntry(decl))
@@ -116,20 +115,24 @@ def p_decl_init(p):
 
 def p_decl_map(p):
     '''decl : mapdecl NL'''
+    raise NotImplementedError("Map type is not supported yet.")
     p[0] = (p[1])
 
 
 def p_mapdecl(p):
-    '''mapdecl : MAP LT type COMMA type GT varname
-    '''
+    '''mapdecl : MAP LT type COMMA type GT varname'''
+    raise NotImplementedError("Map type is not supported yet.")
     p[0] = []
 
 
-def p_rvdecls(p):
-    '''rvdecls : rvdecl rvdecls
-               | empty
-    '''
+def p_rvdecls_empty(p):
+    '''rvdecls : empty'''
     p[0] = []
+
+
+def p_rvdecls_list(p):
+    '''rvdecls : rvdecl rvdecls'''
+    p[0] = [p[1]] + p[2]
 
 
 def p_rvdecl(p):
@@ -137,13 +140,14 @@ def p_rvdecl(p):
               | type varname LBRACE owner RBRACE ASGN num NL
 
     '''
+    raise NotImplementedError("Allread variable is not supported yet")
     p[0] = []
 
 
 def p_owner(p):
     '''owner : TIMES
              | INUM'''
-    p[0] = []
+    p[0] = p[1]
 
 
 def p_funccall(p):
@@ -163,29 +167,14 @@ def p_noargs(p):
     p[0] = []
 
 
-def p_neargs(p):
-    '''neargs : exp
-              | exp COMMA neargs
-    '''
-    alist = []
-    alist.append(p[1])
-    if len(p) > 2:
-        alist += p[3]
-    p[0] = alist
+def p_neargs_one(p):
+    '''neargs : exp'''
+    p[0] = [p[1]]
 
 
-def p_varnames(p):
-    '''varnames : varname
-                | varname COMMA varnames
-    '''
-    if len(p) is 2:
-        p[0] = [p[1]]
-
-    else:
-        vlist = []
-        vlist.append(p[1])
-        vlist += p[3]
-        p[0] = vlist
+def p_neargs_more(p):
+    '''neargs : exp COMMA neargs'''
+    p[0] = [p[1]] + p[3]
 
 
 def p_type(p):
@@ -194,8 +183,6 @@ def p_type(p):
             | STRING
     '''
     p[0] = p[1]
-
-    # print(p[0])
 
 
 def p_numtype(p):
@@ -223,14 +210,14 @@ def p_init_empty(p):
     p[0] = []
 
 
-def p_events(p):
-    '''events : event events
-              | empty '''
-    elist = []
-    if len(p) == 3:
-        elist.append(p[1])
-        elist += p[2]
-    p[0] = elist
+def p_events_list(p):
+    '''events : event events'''
+    p[0] = [p[1]] + p[2]
+
+
+def p_events_empty(p):
+    '''events : empty '''
+    p[0] = []
 
 
 def p_event(p):
@@ -253,32 +240,36 @@ def p_cond(p):
     p[0] = conditionAst(p[1])
 
 
-def p_stmts(p):
-    '''stmts : stmt stmts
-             | empty'''
-    slist = []
-    if len(p) > 2:
-        slist.append(p[1])
-        slist += p[2]
-    p[0] = slist
+def p_stmts_list(p):
+    '''stmts : stmt stmts'''
+    p[0] = [p[1]] + p[2]
 
 
-def p_stmt(p):
+def p_stmts_empty(p):
+    '''stmts : empty'''
+    p[0] = []
+
+
+def p_stmt_1(p):
     '''stmt : asgn
             | passstmt
             | funccall NL
             | modulefunccall NL
-            | ATOMIC COLON NL INDENT stmts DEDENT
-            | IF cond COLON NL INDENT stmts DEDENT elseblock
     '''
-    if len(p) <= 3:
-        p[0] = p[1]
-    elif len(p) == 7:
-        global wnum
-        p[0] = atomicAst(wnum, p[5])
-        wnum += 1
-    else:
-        p[0] = iteAst(p[2], p[6], p[8])
+    p[0] = p[1]
+
+
+def p_stmt_atomic(p):
+    '''stmt : ATOMIC COLON NL INDENT stmts DEDENT'''
+    # TODO move counting atomic block to another phase
+    global wnum
+    p[0] = atomicAst(wnum, p[5])
+    wnum += 1
+
+
+def p_stmt_ite(p):
+    '''stmt : IF cond COLON NL INDENT stmts DEDENT elseblock'''
+    p[0] = iteAst(p[2], p[6], p[8])
 
 
 def p_modulefunccall(p):
@@ -297,9 +288,7 @@ def p_passstmt(p):
 
 
 def p_asgn(p):
-    '''asgn : varname ASGN exp NL
-    '''
-    # print(asgnAst(p[1],p[3]))
+    '''asgn : varname ASGN exp NL'''
     p[0] = asgnAst(p[1], p[3])
 
 
@@ -403,9 +392,7 @@ def p_num_floating(p):
 
 
 def p_varname(p):
-    '''varname : LID
-
-    '''
+    '''varname : LID'''
     p[0] = exprAst('var', p[1])
 
 

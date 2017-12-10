@@ -160,7 +160,7 @@ class initAst(AstBase):
         return inittype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        return visitor.traverseInit(self)
 
 
 class stmtAst(AstBase):
@@ -190,7 +190,7 @@ class atomicAst(stmtAst):
         return atomictype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        raise visitor.traverseAtomicStmt(self)
 
 
 class asgnAst(stmtAst):
@@ -203,7 +203,7 @@ class asgnAst(stmtAst):
         return str(self.lvar) + " = " + str(self.rexp)
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        raise visitor.traverseAssignStmt(self)
 
 
 class passAst(stmtAst):
@@ -237,7 +237,7 @@ class iteAst(stmtAst):
         return s
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        raise visitor.traverseITEStmt(self)
 
 
 class eventAst(AstBase):
@@ -272,7 +272,7 @@ class conditionAst(AstBase):
         return 'condition'
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        visitor.traverseConditional(self)
 
 
 class exprAst(AstBase):
@@ -296,7 +296,21 @@ class exprAst(AstBase):
         return self.etype
 
     def accept(self, visitor):
-        raise NotImplementedError # TODO
+        traverse = {'||': visitor.traverseOrExpr,
+                    '&&': visitor.traverseAndExpr,
+                    '!' : visitor.traverseNotExpr,
+                    '==': visitor.traverseEQExpr,
+                    '!=': visitor.traverseNEQExpr,
+                    '>=': visitor.traverseGEQExpr,
+                    '<=': visitor.traverseLEQExpr,
+                    '>' : visitor.traverseGTExpr,
+                    '<' : visitor.traverseLTExpr,
+                    '+' : visitor.traversePlusExpr,
+                    '-' : visitor.traverseMinusExpr,
+                    '+' : visitor.traversePlusExpr,
+                    '+' : visitor.traversePlusExpr,
+                }[self.op]
+        return traverse(self)
 
 
 class declAst(AstBase):

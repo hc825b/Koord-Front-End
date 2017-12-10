@@ -93,17 +93,54 @@ class PostOrderVisitor(AstVisitorBase):
         return self.visitModule(module)
 
     def traverseDeclaration(self, decl):
-        return True # TODO
+        if not decl.value.accept(self):
+            return False
+        return self.visitDeclaration(decl)
+
+    def traverseInit(self, init):
+        if any((not s.accept(self)) for s in init.stmts):
+            return False
+        return self.visitInit(init)
 
     def traverseEvent(self, event):
         if not event.pre.accept(self):
             return False
         if any((not s.accept(self)) for s in event.eff):
             return False
-        return True
+        return self.visitEvent(event)
+
+    def traverseConditional(self, cond):
+        '''Traverse precondition or if-condition'''
+        if not cond.exp.accept(self):
+            return False
+        return self.visitConditional(cond)
+
+    def traverseAtomicStmt(self, atom):
+        if any(not s.accept(self) for s in atom.stmts):
+            return False
+        return self.visitAtomicStmt(atom)
+
+    def traverseAssignStmt(self, asgn):
+        if not asgn.lvar.accept(self):
+            return False
+        if not asgn.rexp.accept(self):
+            return False
+        return self.visitAssignStmt(asgn)
 
     def traversePassStmt(self, stmt):
         return True
+
+    def traverseITEStmt(self, ite):
+        if not ite.cond.accept(self):
+            return False
+        if any((not s.accept(self)) for s in ite.t):
+            return False
+        if any((not s.accept(self)) for s in ite.e):
+            return False
+        return visitITEStmt(self, ite)
+
+    # TODO for functions and module functions
+    # XXX they are both expression and statement
 
     def traverseOrExpr(self, expr):
         if not expr.lexp.accept(self):
@@ -128,6 +165,27 @@ class PostOrderVisitor(AstVisitorBase):
         return True
 
     def visitModule(self, module):
+        return True
+
+    def visitDeclaration(self, decl):
+        return True
+
+    def visitInit(self, init):
+        return True
+
+    def visitEvent(self, event):
+        return True
+
+    def visitConditional(self, cond):
+        return True
+
+    def visitAtomicStmt(self, atom):
+        return True
+
+    def visitAssignStmt(self, asgn):
+        return True
+
+    def visitITEStmt(self, ite):
         return True
 
     def visitOrExpr(self, expr):

@@ -1,0 +1,21 @@
+agent GotoTarget
+
+using module Motion:
+    actuators:
+       ItemPosition target
+    sensors:
+       ItemPosition position
+
+allwrite:
+    pass
+
+allread:
+    pass
+
+local:
+    pass
+
+move:
+    pre: (true)
+    eff: target = newPos(770, 770, 770)
+

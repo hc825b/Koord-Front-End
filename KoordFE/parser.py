@@ -33,18 +33,12 @@ def p_modules(p):
 
 def p_module(p):
     '''module : USING MODULE CID COLON NL INDENT actuatordecls sensordecls DEDENT'''
-    if isAst(p[7]):
-        pass
-    else:
-        for decl in p[7]:
-            global symtab
-            symtab.append(mkEntry(decl).set_module(p[2]))
-    if isAst(p[7]):
-        pass
-    else:
-        for decl in p[7]:
-            global symtab
-            symtab.append(mkEntry(decl).set_module(p[2]))
+    for decl in p[7] + p[8]:
+        entry = mkEntry(decl)
+        entry.set_module(p[2])
+        global symtab
+        symtab.append(entry)
+
     p[0] = moduleAst(p[3], p[7], p[8])
 
 
@@ -92,7 +86,8 @@ def p_passdecls(p):
 
 
 def p_locdecls(p):
-    '''locdecls : LOCAL COLON NL INDENT decls DEDENT'''
+    '''locdecls : LOCAL COLON NL INDENT decls DEDENT
+                | LOCAL COLON NL INDENT passdecls DEDENT'''
     for decl in p[5]:
         global symtab
         symtab.append(mkEntry(decl))

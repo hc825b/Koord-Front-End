@@ -22,7 +22,7 @@ class LeafBlackBox<T> extends LeafDAG<T> {
 
 	@Override
 	protected boolean ready() {
-		return _value == null;
+		return _value != null;
 	}
 
 	@Override

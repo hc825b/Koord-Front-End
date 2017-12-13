@@ -29,7 +29,7 @@ abstract class LeafDAG<T> extends DAG {
 
 	@Override
 	protected Object calc() {
-		if (ready())
+		if (!ready())
 			read();
 		return get();
 	}

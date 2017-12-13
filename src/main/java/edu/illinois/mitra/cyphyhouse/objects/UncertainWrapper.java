@@ -1,5 +1,7 @@
 package edu.illinois.mitra.cyphyhouse.objects;
 
+import java.util.function.Supplier;
+
 /**
  * This wrapper class provides overloaded static functions for both primitive
  * type and Uncertain<T> type to simplify the code generation pass
@@ -15,13 +17,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<N> opPlus(Uncertain<N> lhs, N rhs) {
-		// TODO
-		return null;
+		return opPlus(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<N> opPlus(N lhs, Uncertain<N> rhs) {
-		// TODO
-		return null;
+		return opPlus(newConstant(lhs), rhs);
 	}
 
 	static public int opMinus(int lhs, int rhs) {
@@ -33,13 +33,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<N> opMinus(Uncertain<N> lhs, N rhs) {
-		// TODO
-		return null;
+		return opMinus(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<N> opMinus(N lhs, Uncertain<N> rhs) {
-		// TODO
-		return null;
+		return opMinus(newConstant(lhs), rhs);
 	}
 
 	static public int opTimes(int lhs, int rhs) {
@@ -51,13 +49,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<N> opTimes(Uncertain<N> lhs, N rhs) {
-		// TODO
-		return null;
+		return opTimes(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<N> opTimes(N lhs, Uncertain<N> rhs) {
-		// TODO
-		return null;
+		return opTimes(newConstant(lhs), rhs);
 	}
 
 	static public int opDivBy(int lhs, int rhs) {
@@ -69,13 +65,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<N> opDivBy(Uncertain<N> lhs, N rhs) {
-		// TODO
-		return null;
+		return opDivBy(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<N> opDivBy(N lhs, Uncertain<N> rhs) {
-		// TODO
-		return null;
+		return opDivBy(newConstant(lhs), rhs);
 	}
 
 	static public boolean opGEQ(int lhs, int rhs) {
@@ -87,13 +81,13 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opGEQ(Uncertain<N> lhs, N rhs) {
-		return null; // TODO
+		return opGEQ(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opGEQ(N lhs, Uncertain<N> rhs) {
-		return null; // TODO
+		return opGEQ(newConstant(lhs), rhs);
 	}
-	
+
 	static public boolean opLEQ(int lhs, int rhs) {
 		return lhs <= rhs;
 	}
@@ -102,15 +96,14 @@ public final class UncertainWrapper extends Uncertain.Utils {
 		return lhs <= rhs;
 	}
 
-
 	static public <N extends Number> Uncertain<Boolean> opLEQ(Uncertain<N> lhs, N rhs) {
-		return null; // TODO
+		return opLEQ(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opLEQ(N lhs, Uncertain<N> rhs) {
-		return null; // TODO
+		return opLEQ(newConstant(lhs), rhs);
 	}
-	
+
 	static public boolean opGT(int lhs, int rhs) {
 		return lhs > rhs;
 	}
@@ -120,11 +113,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opGT(Uncertain<N> lhs, N rhs) {
-		return null; // TODO
+		return opGT(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opGT(N lhs, Uncertain<N> rhs) {
-		return null; // TODO
+		return opGT(newConstant(lhs), rhs);
 	}
 
 	static public boolean opLT(int lhs, int rhs) {
@@ -136,11 +129,11 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opLT(Uncertain<N> lhs, N rhs) {
-		return null; // TODO
+		return opLT(lhs, newConstant(rhs));
 	}
 
 	static public <N extends Number> Uncertain<Boolean> opLT(N lhs, Uncertain<N> rhs) {
-		return null; // TODO
+		return opLT(newConstant(lhs), rhs);
 	}
 
 	static public boolean opAnd(boolean lhs, boolean rhs) {
@@ -159,22 +152,16 @@ public final class UncertainWrapper extends Uncertain.Utils {
 		return cond;
 	}
 
-	static public int newValue(int old_value, int new_value) {
-		return new_value;
+	static public <T> T newValue(T old_value, Supplier<T> sampler) {
+		return sampler.get();
 	}
 
-	static public float newValue(float old_value, float new_value) {
-		return new_value;
-	}
-
-	static public Uncertain<Integer> newValue(Uncertain<Integer> old_value, int new_value) {
-		// TODO call the same constructor for old_value but initialize with new_value
-		return null;
-	}
-
-	static public Uncertain<Float> newValue(Uncertain<Float> old_value, float new_value) {
-		// TODO call the same constructor for old_value but initialize with new_value
-		return null;
+	/**
+	 * Return a new Uncertain object with the same type T. old_value is provided as
+	 * a parameter for function overloading
+	 */
+	static public <T extends Number> Uncertain<T> newValue(Uncertain<T> old_value, Supplier<T> sampler) {
+		return new BlackBox<T>(sampler);
 	}
 
 	static public int getValue(int value) {
@@ -186,7 +173,7 @@ public final class UncertainWrapper extends Uncertain.Utils {
 	}
 
 	static public <T> T getValue(Uncertain<T> value) {
-		return value.sample();
+		return value.sample(); // XXX return expected value rather than a sample?
 	}
 
 	protected UncertainWrapper() {

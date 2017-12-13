@@ -1,10 +1,14 @@
 package edu.illinois.mitra.cyphyhouse.objects;
 
+import java.util.function.Supplier;
+
 /**
- * Uncertain
+ * Implementation of Uncertain< T > approach in paper, "Uncertain< T >: A
+ * First-Order Type for Uncertain Data", ASPLOS'2014
+ *
+ * @author Chiao Hsieh
  *
  */
-
 public abstract class Uncertain<T> {
 
 	/**
@@ -15,16 +19,8 @@ public abstract class Uncertain<T> {
 	 *
 	 */
 	public static class Utils {
-		static public Uncertain<Boolean> newConstant(boolean b) {
-			return new Constant<Boolean>(b);
-		}
-
-		static public Uncertain<Integer> newConstant(int n) {
-			return new Constant<Integer>(n);
-		}
-
-		static public Uncertain<Float> newConstant(float f) {
-			return new Constant<Float>(f);
+		static public <T> Uncertain<T> newConstant(T value) {
+			return new Constant<T>(value);
 		}
 
 		static public <N extends Number> Uncertain<N> opPlus(Uncertain<N> lhs, Uncertain<N> rhs) {
@@ -76,23 +72,91 @@ public abstract class Uncertain<T> {
 		}
 
 		/**
-		 * Return probability that a given predicate is True.
+		 * The class implements Sequential Probability Ratio Test
+		 */
+		static class SPRT {
+
+			final Supplier<Boolean> getObservation;
+			final float L, H;
+			final float pd, pf;
+
+			protected int succNum, failNum;
+
+			public SPRT(Supplier<Boolean> getObservation, float L, float H) {
+				this.getObservation = getObservation;
+				assert (0 <= L && L <= 1 && 0 <= H && H <= 1 && L < H);
+				this.L = L;
+				this.H = H;
+				this.pd = 0.99F;
+				this.pf = 0.01F;
+				this.succNum = 0;
+				this.failNum = 0;
+			}
+
+			public SPRT(Supplier<Boolean> getObservation, float L, float H, float pd, float pf) {
+				this.getObservation = getObservation;
+				assert (0 <= L && L <= 1 && 0 <= H && H <= 1 && L < H);
+				this.L = L;
+				this.H = H;
+				assert (0 < pd + pf && pd + pf <= 1);
+				this.pd = pd;
+				this.pf = pf;
+				this.succNum = 0;
+				this.failNum = 0;
+			}
+
+			protected boolean WaldStep() {
+				float beta = pd;
+				float alpha = pf;
+				int succNum0 = succNum;
+				int failNum0 = failNum;
+
+				boolean sample = getObservation.get();
+				succNum = sample ? succNum0 + 1 : succNum0;
+				failNum = sample ? failNum0 : failNum0 + 1;
+
+				double logLRatio = succNum * Math.log(H) + failNum * Math.log(1 - H) - succNum * Math.log(L)
+						- failNum * Math.log(1 - L);
+
+				if (logLRatio > Math.log(beta) - Math.log(alpha))
+					return true; // report p > H
+				else if (logLRatio < Math.log(1 - beta) - Math.log(1 - alpha))
+					return false; // report p < L
+				else
+					return WaldStep(); // XXX tail recursion may be changed to while-loop
+			}
+
+			boolean WaldTest() {
+				// Initialize before every test
+				succNum = 0;
+				failNum = 0;
+				return WaldStep();
+			}
+		}
+
+		/**
+		 * Return the probability that a given predicate is True is greater than certain
+		 * threshold.
+		 * 
 		 * 
 		 * @param cond
-		 *            Given Uncertain< Boolean > predicate
-		 * @return The probability that the predicate is True
+		 *            Given Uncertain < Boolean > predicate
+		 * @param threshold
+		 *            User specified threshold
+		 * 
+		 * @return Whether the probability is higher than the threshold
 		 */
-		static public Float probability(Uncertain<Boolean> cond) {
-			// TODO
-			return null;
+		static public boolean conditional(Uncertain<Boolean> cond, float threshold) {
+
+			Supplier<Boolean> getObservation = () -> (cond.sample());
+
+			// XXX decide better L, H ,pD, pF
+			SPRT sprt = new SPRT(getObservation, threshold - 0.05F, threshold);
+			return sprt.WaldTest();
 		}
 
 		static public boolean conditional(Uncertain<Boolean> cond) {
 			return conditional(cond, 0.5F);
-		}
-
-		static public boolean conditional(Uncertain<Boolean> cond, float threshold) {
-			return probability(cond) > threshold;
 		}
 
 		/**

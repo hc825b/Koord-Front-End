@@ -162,6 +162,9 @@ def getCodeGen(v, symtab):
     e = getEntry(v, symtab)
     if e is not None:
         if e.scope is not LOCAL:
+            raise NotImplementedError("Broken due to new wrapper functions. Please check TODO.")
+            # TODO this code is broken due to new wrapper funtions
+            # The generated code should generate a Supplier<Type> object as a new sampler
             readStr = lambda e: 'dsm.get("' + str(e.varname) + '", "' + str(e.owner) + '")'
             readVal = lambda e: cast(e.dtype) + '(' + readStr(e) + ')'
             # XXX e.varname is also provided as argument because we need the

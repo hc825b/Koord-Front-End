@@ -1,5 +1,9 @@
 package edu.illinois.mitra.cyphyhouse.objects;
 
+import java.util.function.Supplier;
+
+import org.apache.log4j.Logger;
+
 /**
  * Internal graphical representation of Bayesian Network
  * 
@@ -39,6 +43,37 @@ abstract class LeafDAG<T> extends DAG {
 	abstract protected void read();
 
 	abstract protected T get();
+}
+
+class LeafBlackBox<T> extends LeafDAG<T> {
+	protected org.apache.log4j.Logger log = Logger.getLogger(LeafBlackBox.class);
+
+	protected final Supplier<T> _sampler;
+
+	LeafBlackBox(Supplier<T> sampler) {
+		_sampler = sampler;
+	}
+
+	@Override
+	void initDAG() {
+		_value = null;
+	}
+
+	@Override
+	protected boolean ready() {
+		return _value != null;
+	}
+
+	@Override
+	final protected void read() {
+		_value = _sampler.get();
+		log.debug("_vaule:" + _value);
+	}
+
+	@Override
+	final protected T get() {
+		return _value;
+	}
 }
 
 class LeafPointMass<T> extends LeafDAG<T> {

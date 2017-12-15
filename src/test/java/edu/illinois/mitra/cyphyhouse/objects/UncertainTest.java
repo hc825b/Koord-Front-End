@@ -54,7 +54,7 @@ public class UncertainTest {
 		int result = X.sample();
 		assertTrue("result=" + Integer.toString(result), result == -1);
 	}
-
+	
 	@Test
 	public void testSampleDAG() {
 		FakeRNG x_rng = new FakeRNG(10);
@@ -139,5 +139,15 @@ public class UncertainTest {
 		assertFalse(UncertainWrapper.conditional(cond));
 	}
 
+	
+	@Test
+	public void testUniformF() {
+		Uncertain<Float> X = new UniformF(0F, 10F);
+		Uncertain<Float> Y = new UniformF(0F, 10F);
+		
+		X = UncertainWrapper.opMinus(X, Y);
+
+		assertTrue(UncertainWrapper.conditional(UncertainWrapper.opLT(X, 0F), 0.4F));
+	}
 	// TODO Achieve higher coverage by testing all operators and different scenarios
 }

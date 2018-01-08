@@ -142,8 +142,8 @@ public class UncertainTest {
 	
 	@Test
 	public void testUniformF() {
-		Uncertain<Float> X = new UniformF(0F, 10F);
-		Uncertain<Float> Y = new UniformF(0F, 10F);
+		Uncertain<Float> X = new UniformFloat(0F, 10F);
+		Uncertain<Float> Y = new UniformFloat(0F, 10F);
 		
 		X = UncertainWrapper.opMinus(X, Y);
 

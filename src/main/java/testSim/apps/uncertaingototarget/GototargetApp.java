@@ -1,10 +1,13 @@
-package testSim.apps.gototarget;
+package testSim.apps.uncertaingototarget;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import edu.illinois.mitra.cyphyhouse.interfaces.MutualExclusion;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.function.Supplier;
+
 import edu.illinois.mitra.cyphyhouse.functions.DSMMultipleAttr;
 import edu.illinois.mitra.cyphyhouse.comms.RobotMessage;
 import edu.illinois.mitra.cyphyhouse.gvh.GlobalVarHolder;
@@ -12,9 +15,12 @@ import edu.illinois.mitra.cyphyhouse.interfaces.LogicThread;
 import edu.illinois.mitra.cyphyhouse.motion.MotionParameters;
 import edu.illinois.mitra.cyphyhouse.motion.RRTNode;
 import edu.illinois.mitra.cyphyhouse.motion.MotionParameters.COLAVOID_MODE_TYPE;
+import edu.illinois.mitra.cyphyhouse.objects.BlackBox;
 import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;
 import edu.illinois.mitra.cyphyhouse.objects.ObstacleList;
 import edu.illinois.mitra.cyphyhouse.objects.PositionList;
+import edu.illinois.mitra.cyphyhouse.objects.Uncertain;
+import edu.illinois.mitra.cyphyhouse.objects.UncertainWrapper;
 import edu.illinois.mitra.cyphyhouse.interfaces.DSM;
 import edu.illinois.mitra.cyphyhouse.functions.GroupSetMutex;
 
@@ -33,7 +39,7 @@ public class GototargetApp extends LogicThread {
 
 	ItemPosition target;
 	ItemPosition position;
-	
+
 	int error = 0;
 
 	public GototargetApp(GlobalVarHolder gvh) {
@@ -46,6 +52,12 @@ public class GototargetApp extends LogicThread {
 		pid = Integer.parseInt(name.replaceAll("[^0-9]", ""));
 		numBots = gvh.id.getParticipants().size();
 		dsm = new DSMMultipleAttr(gvh);
+	}
+
+	private int Rayleigh(double epsilon) {
+		Random rng = new Random();
+		double sign = rng.nextBoolean()? 1 : -1;
+		return (int) (sign * epsilon * Math.sqrt(-2 * Math.log(rng.nextDouble())));
 	}
 
 	@Override
@@ -68,7 +80,10 @@ public class GototargetApp extends LogicThread {
 			// Program Turn
 			//// Read sensors
 			position = gvh.gps.getMyPosition();
-			if(position.getX() < x - 40 || position.getX() > x + 40)
+			int pos_x = position.getX();
+			Uncertain<Integer> cur_x = new BlackBox<Integer>(() -> pos_x + Rayleigh(5.0));
+			if (UncertainWrapper.conditional(
+					UncertainWrapper.opOr(UncertainWrapper.opLT(cur_x, x - 40), UncertainWrapper.opGT(cur_x, x + 40))))
 				error++;
 			switch (stage) {
 			case PICK:

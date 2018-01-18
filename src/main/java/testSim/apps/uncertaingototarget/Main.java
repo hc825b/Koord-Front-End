@@ -1,4 +1,4 @@
-package testSim.apps.gototarget;
+package testSim.apps.uncertaingototarget;
 
 import testSim.main.SimSettings;
 import testSim.main.Simulation;

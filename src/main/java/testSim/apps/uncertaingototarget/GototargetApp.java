@@ -16,6 +16,7 @@ import edu.illinois.mitra.cyphyhouse.motion.MotionParameters;
 import edu.illinois.mitra.cyphyhouse.motion.RRTNode;
 import edu.illinois.mitra.cyphyhouse.motion.MotionParameters.COLAVOID_MODE_TYPE;
 import edu.illinois.mitra.cyphyhouse.objects.BlackBox;
+import edu.illinois.mitra.cyphyhouse.objects.GPSNoiseInteger;
 import edu.illinois.mitra.cyphyhouse.objects.ItemPosition;
 import edu.illinois.mitra.cyphyhouse.objects.ObstacleList;
 import edu.illinois.mitra.cyphyhouse.objects.PositionList;
@@ -54,12 +55,6 @@ public class GototargetApp extends LogicThread {
 		dsm = new DSMMultipleAttr(gvh);
 	}
 
-	private int Rayleigh(double epsilon) {
-		Random rng = new Random();
-		double sign = rng.nextBoolean()? 1 : -1;
-		return (int) (sign * epsilon * Math.sqrt(-2 * Math.log(rng.nextDouble())));
-	}
-
 	@Override
 	public List<Object> callStarL() {
 
@@ -81,7 +76,7 @@ public class GototargetApp extends LogicThread {
 			//// Read sensors
 			position = gvh.gps.getMyPosition();
 			int pos_x = position.getX();
-			Uncertain<Integer> cur_x = new BlackBox<Integer>(() -> pos_x + Rayleigh(5.0));
+			Uncertain<Integer> cur_x = new GPSNoiseInteger(pos_x, 5.0);
 			if (UncertainWrapper.conditional(
 					UncertainWrapper.opOr(UncertainWrapper.opLT(cur_x, x - 40), UncertainWrapper.opGT(cur_x, x + 40))))
 				error++;
